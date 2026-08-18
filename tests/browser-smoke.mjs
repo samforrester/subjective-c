@@ -20,7 +20,7 @@ try {
   await search.fill("");
   await page.getByRole("button", { name: /new project/i }).first().click();
   await page.getByRole("dialog").waitFor();
-  await page.getByRole("button", { name: "Close" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   const results = await new AxeBuilder({ page }).exclude(".sc-inspector").analyze();
   if (results.violations.length) {
     throw new Error(`Accessibility violations: ${results.violations.map(({ id }) => id).join(", ")}`);
