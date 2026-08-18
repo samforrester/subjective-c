@@ -43,7 +43,7 @@ async function enterReality(id, hold = 1200) {
 }
 
 try {
-  await page.goto(`${app.url}?cinema=1&seed=x-launch&interpretation=gravity-well`, { waitUntil: "networkidle" });
+  await page.goto(`${app.url}?cinema=1&seed=x-launch&interpretation=gravity-well`, { waitUntil: "domcontentloaded" });
   await page.locator(".sc-shell").waitFor();
   await pause(1450);
   await page.evaluate(() => window.SubjectiveC.setCinemaPhase("live"));
