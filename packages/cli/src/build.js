@@ -182,6 +182,7 @@ let preferences = { ...${JSON.stringify(safeConfig.preferences, null, 2)}, ...pr
 const urlParameters = new URLSearchParams(location.search);
 const seedFromUrl = urlParameters.get("seed");
 const interpretationFromUrl = urlParameters.get("interpretation");
+const cinemaMode = urlParameters.get("cinema") === "1";
 const interpretationIds = new Set(SUBJECTIVE_INTERPRETATIONS.map(({ id }) => id));
 let interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : null;
 
@@ -218,13 +219,27 @@ function transition(update) {
   render();
 }
 
+function setCinemaPhase(phase) {
+  if (!cinemaMode) return;
+  document.documentElement.dataset.subjectiveCinema = ["intro", "live", "outro"].includes(phase) ? phase : "live";
+}
+
+function setInterpretation(value) {
+  if (!interpretationIds.has(value)) return false;
+  transition(() => {
+    interpretation = value;
+    seed = "cinema:" + value;
+  });
+  return true;
+}
+
 function render() {
   const variant = createVariant(manifest, { seed, context, novelty, interpretation: interpretation || undefined });
   const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
   document.documentElement.dataset.subjectiveVariant = variant.id;
   document.documentElement.dataset.subjectiveLayout = variant.layout;
   document.documentElement.dataset.subjectiveInterpretation = variant.theme.interpretation;
-  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret };
+  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret, setInterpretation, setCinemaPhase };
   mountSubjective(target, {
     source,
     manifest,
@@ -236,9 +251,14 @@ function render() {
     inspectorOpen,
     preferences,
     themeTokens,
+    cinemaMode,
     callbacks: {
       onRegenerate: reinterpret,
       onInterpretationChange(value) {
+        if (value && interpretationIds.has(value)) {
+          setInterpretation(value);
+          return;
+        }
         transition(() => {
           interpretation = value;
           seed = freshSeed();
@@ -324,6 +344,7 @@ window.addEventListener("resize", () => {
 });
 
 render();
+setCinemaPhase(cinemaMode ? "intro" : "live");
 
 ${dev ? `let lastBuildVersion = null;
 setInterval(async () => {

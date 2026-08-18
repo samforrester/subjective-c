@@ -72,6 +72,14 @@ test("renderSubjectiveMarkup exposes SF interpretation chrome and adaptive langu
   assert.match(html, /Service advisory/);
 });
 
+test("cinema mode renders a deterministic launch-film surface", () => {
+  const html = renderSubjectiveMarkup({ manifest, variant, data: {}, cinemaMode: true, devtools: true });
+  assert.match(html, /sc-cinema-mode/);
+  assert.match(html, /What if intent/);
+  assert.match(html, /Intent is source code/);
+  assert.match(html, /sc-cinema-watermark/);
+});
+
 test("provider-controlled glyphs are escaped before HTML interpolation", () => {
   const html = renderSubjectiveMarkup({
     manifest: { ...manifest, domain: { ...manifest.domain, icon: '<img src=x onerror="alert(1)">' } },
