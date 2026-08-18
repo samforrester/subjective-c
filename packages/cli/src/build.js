@@ -188,7 +188,7 @@ const cinemaRecording = urlParameters.get("recording") === "1";
 document.documentElement.dataset.subjectiveCinemaRecording = cinemaRecording ? "on" : "off";
 const interpretationIds = new Set(SUBJECTIVE_INTERPRETATIONS.map(({ id }) => id));
 let interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : null;
-const cinemaSequence = ["gravity-well", "dream-fold", "mission-neon", "ship-command", "muni-control", "sutro-fog", "exploratorium-lab"];
+const cinemaSequence = ["gravity-well", "sutro-fog", "dream-fold", "mission-neon", "ferry-tide", "exploratorium-lab", "ship-command"];
 let cinemaAutoplayTimer = null;
 
 function freshSeed() {
@@ -253,7 +253,7 @@ function toggleCinemaAutoplay(force) {
     cinemaAutoplayTimer = setInterval(() => {
       const current = cinemaSequence.indexOf(interpretation);
       setInterpretation(cinemaSequence[(current + 1 + cinemaSequence.length) % cinemaSequence.length]);
-    }, 4200);
+    }, 5600);
   }
   syncCinemaControls();
 }

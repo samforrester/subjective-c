@@ -19,6 +19,15 @@ const INTERPRETATION_OPTIONS = Object.freeze([
   ["gravity-well", "Farallon Gravity Array"],
   ["dream-fold", "Market Street Dream Fold"]
 ]);
+const CINEMA_JOURNEY = Object.freeze([
+  { id: "gravity-well", number: "01", place: "Lands End", coordinate: "37.7800° N", title: "Intent enters as signal.", copy: "At the edge of the city, the interface begins with meaning—not pixels." },
+  { id: "sutro-fog", number: "02", place: "Sutro Tower", coordinate: "37.7552° N", title: "Context changes what becomes visible.", copy: "The same product clarifies itself for the person, place, and moment." },
+  { id: "dream-fold", number: "03", place: "Market Street", coordinate: "37.7897° N", title: "Structure can fold without losing meaning.", copy: "Navigation, hierarchy, and density transform. The contract underneath stays intact." },
+  { id: "mission-neon", number: "04", place: "24th Street", coordinate: "37.7522° N", title: "Culture changes the surface.", copy: "A system can belong to its environment without becoming a costume." },
+  { id: "ferry-tide", number: "05", place: "Embarcadero", coordinate: "37.7955° N", title: "The interface moves with its world.", copy: "Motion carries state, direction, and consequence instead of adding decoration." },
+  { id: "exploratorium-lab", number: "06", place: "Pier 15", coordinate: "37.8017° N", title: "Every reality remains inspectable.", copy: "See the interpretation, test the plan, and trace every choice back to intent." },
+  { id: "ship-command", number: "07", place: "Fort Mason", coordinate: "37.8068° N", title: "Actions remain stable in every reality.", copy: "Eleven interfaces. One trusted capability model. Zero broken promises." }
+]);
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -122,15 +131,26 @@ function renderExperienceChrome(variant) {
     <div class="sc-transmission" aria-hidden="true"><div>${escapeHtml(transmission.repeat(4))}</div></div>`;
 }
 
-function renderCinemaChrome() {
+function cinemaJourneyMeta(variant) {
+  const id = interpretationMeta(variant).id;
+  return CINEMA_JOURNEY.find((stop) => stop.id === id) || CINEMA_JOURNEY[0];
+}
+
+function renderCinemaChrome(variant) {
+  const current = cinemaJourneyMeta(variant);
+  const route = CINEMA_JOURNEY.map((stop) => `
+    <button type="button" class="${stop.id === current.id ? "is-active" : ""}" data-sc-cinema-stop="${escapeHtml(stop.id)}" aria-label="Travel to ${escapeHtml(stop.place)}" ${stop.id === current.id ? 'aria-current="step"' : ""}>
+      <i aria-hidden="true"></i><span>${escapeHtml(stop.place)}</span>
+    </button>`).join("");
   return `
     <div class="sc-cinema-grain" aria-hidden="true"></div>
-    <div class="sc-cinema-watermark" aria-hidden="true"><b>SUBJECTIVE C</b><span>INTENT → INTERFACE</span></div>
+    <div class="sc-cinema-watermark" aria-hidden="true"><b>SUBJECTIVE C</b><span>SAN FRANCISCO / 2026</span></div>
     <section class="sc-cinema-slate sc-cinema-intro" aria-label="Subjective C demo introduction">
-      <small>An interface compiler experiment</small>
-      <h2>What if intent<br>was the source code?</h2>
-      <p>One product. Eleven realities. Stable meaning.</p>
-      <button class="sc-cinema-enter" type="button" data-sc-cinema-enter>Enter reality <span aria-hidden="true">↓</span></button>
+      <small>Subjective C / San Francisco</small>
+      <h2>One intent.<br>Eleven interfaces.</h2>
+      <p>Product meaning compiled into interfaces that adapt to context—without changing what the product can do.</p>
+      <div class="sc-cinema-proof" aria-label="Project facts"><span><b>11</b> interpretations</span><span><b>120</b> semantic plans</span><span><b>41</b> tests</span><span><b>0</b> broken anchors</span></div>
+      <button class="sc-cinema-enter" type="button" data-sc-cinema-enter>Travel through San Francisco <span aria-hidden="true">→</span></button>
     </section>
     <section class="sc-cinema-slate sc-cinema-outro" aria-label="Subjective C demo conclusion">
       <small>Subjective C</small>
@@ -138,10 +158,18 @@ function renderCinemaChrome() {
       <p>github.com/samforrester/subjective-c</p>
       <button class="sc-cinema-enter" type="button" data-sc-cinema-enter>Run it again <span aria-hidden="true">↻</span></button>
     </section>
-    <div class="sc-cinema-director" aria-label="Cinema controls">
-      <button type="button" data-sc-cinema-autoplay aria-pressed="false"><i></i> Autopilot</button>
-      <span>Use [ ] to bend reality</span>
-      <button type="button" data-sc-cinema-exit>Open the lab ↗</button>
+    <section class="sc-city-chapter" aria-live="polite">
+      <div class="sc-city-chapter-kicker"><span>${escapeHtml(current.number)} / 07</span><span>${escapeHtml(current.place)}</span><span>${escapeHtml(current.coordinate)}</span></div>
+      <h2>${escapeHtml(current.title)}</h2>
+      <p>${escapeHtml(current.copy)}</p>
+    </section>
+    <div class="sc-city-journey" aria-label="San Francisco interface journey">
+      <div class="sc-city-route">${route}</div>
+      <div class="sc-cinema-director" aria-label="Cinema controls">
+        <button type="button" data-sc-cinema-autoplay aria-pressed="false"><i></i> Autopilot</button>
+        <span>[ ] to travel</span>
+        <button type="button" data-sc-cinema-exit>Open the product ↗</button>
+      </div>
     </div>`;
 }
 
@@ -652,7 +680,7 @@ export function renderSubjectiveMarkup(state) {
 
   return `
     <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}" data-sc-interpretation="${escapeHtml(interpretation.id)}">
-      ${cinemaMode ? renderCinemaChrome() : ""}
+      ${cinemaMode ? renderCinemaChrome(variant) : ""}
       ${renderExperienceChrome(variant)}
       <div class="sc-city-chrome" aria-hidden="true"><span>37.7749° N / 122.4194° W</span><strong>${escapeHtml(interpretation.symbol)}</strong><span>${escapeHtml(interpretation.location)} / LIVE</span></div>
       <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
@@ -773,6 +801,12 @@ function bindSubjective(target, state, options = {}) {
     const lensShift = element.closest("[data-sc-lens-shift]");
     if (lensShift) {
       callbacks.onInterpretationChange?.(shiftedInterpretation(state.variant, Number(lensShift.getAttribute("data-sc-lens-shift"))));
+      return;
+    }
+
+    const cinemaStop = element.closest("[data-sc-cinema-stop]");
+    if (cinemaStop) {
+      callbacks.onInterpretationChange?.(cinemaStop.getAttribute("data-sc-cinema-stop"));
       return;
     }
 
