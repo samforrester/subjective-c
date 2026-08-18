@@ -47,17 +47,32 @@ select:focus-visible,
   display: none !important;
 }
 
+.sc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .sc-shell {
   --sc-hue: 246;
   --sc-radius: 18px;
-  --sc-accent: hsl(var(--sc-hue) 88% 58%);
+  --sc-accent: hsl(var(--sc-hue) 70% 28%);
+  --sc-on-accent: #ffffff;
   --sc-accent-soft: hsl(var(--sc-hue) 84% 95%);
+  --sc-positive: #087548;
+  --sc-negative: #b42332;
   --sc-bg: #f5f5f2;
   --sc-panel: rgba(255, 255, 255, 0.78);
   --sc-panel-solid: #ffffff;
   --sc-text: #17191f;
   --sc-muted: #6f7380;
-  --sc-faint: #9da0aa;
+  --sc-faint: #5b606b;
   --sc-line: rgba(23, 25, 31, 0.1);
   --sc-shadow: 0 24px 60px rgba(24, 27, 35, 0.09);
   --sc-header-height: 76px;
@@ -79,7 +94,11 @@ select:focus-visible,
   --sc-panel-solid: #161820;
   --sc-text: #f5f6fa;
   --sc-muted: #a4a8b5;
-  --sc-faint: #6d7280;
+  --sc-faint: #8e94a3;
+  --sc-accent: hsl(var(--sc-hue) 82% 72%);
+  --sc-on-accent: #0b0d12;
+  --sc-positive: #56d69a;
+  --sc-negative: #ff7b86;
   --sc-line: rgba(255, 255, 255, 0.1);
   --sc-accent-soft: hsl(var(--sc-hue) 42% 19%);
   --sc-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
@@ -126,6 +145,9 @@ select:focus-visible,
   --sc-faint: #4a4a4a;
   --sc-line: #000000;
   --sc-accent: #0000ee;
+  --sc-on-accent: #ffffff;
+  --sc-positive: #006400;
+  --sc-negative: #b00020;
   --sc-accent-soft: #eeeeff;
   --sc-shadow: none;
 }
@@ -452,17 +474,17 @@ button.sc-avatar {
 }
 
 .sc-button-primary {
-  color: white;
+  color: var(--sc-on-accent);
   background: var(--sc-accent);
   box-shadow: 0 10px 24px color-mix(in srgb, var(--sc-accent) 28%, transparent), inset 0 1px rgba(255,255,255,.25);
 }
 
 .sc-button-primary kbd {
   padding: 2px 5px;
-  border: 1px solid rgba(255,255,255,.27);
+  border: 1px solid color-mix(in srgb, var(--sc-on-accent) 30%, transparent);
   border-radius: 5px;
-  color: rgba(255,255,255,.7);
-  background: rgba(0,0,0,.12);
+  color: color-mix(in srgb, var(--sc-on-accent) 78%, transparent);
+  background: color-mix(in srgb, var(--sc-on-accent) 12%, transparent);
   font-family: inherit;
   font-size: 8px;
 }
@@ -779,13 +801,13 @@ button.sc-avatar {
 .sc-metric > small {
   display: block;
   margin-top: 8px;
-  color: #1c9b68;
-  font-size: 9px;
+  color: var(--sc-positive);
+  font-size: 11px;
   font-weight: 720;
 }
 
 .sc-metric > small.is-negative {
-  color: #d9515d;
+  color: var(--sc-negative);
 }
 
 .sc-metrics-strip .sc-metric > strong {
@@ -1044,7 +1066,14 @@ button.sc-avatar {
 .sc-due,
 .sc-row-arrow {
   color: var(--sc-muted);
-  font-size: 9px;
+  font-size: 11px;
+}
+
+button.sc-row-arrow {
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .sc-table-wrap {
@@ -1196,7 +1225,7 @@ button.sc-avatar {
   display: block;
   margin-top: 4px;
   color: var(--sc-faint);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .sc-activity-ticker .sc-activity-list {
@@ -1264,7 +1293,7 @@ button.sc-avatar {
   gap: 20px;
   padding: 24px clamp(18px, 4vw, 56px) 42px;
   color: var(--sc-faint);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .sc-empty-state {

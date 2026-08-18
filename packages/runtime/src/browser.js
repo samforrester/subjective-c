@@ -162,7 +162,7 @@ function renderMetrics(data, variant) {
   }
 
   return `
-    <section class="sc-section sc-metrics sc-metrics-${escapeHtml(variant.composition.metrics)}" id="analytics" aria-label="Metrics">
+    <section class="sc-section sc-metrics sc-metrics-${escapeHtml(variant.composition.metrics)}" id="analytics" aria-label="Metrics" ${variant.composition.metrics === "rail" ? 'tabindex="0"' : ""}>
       ${metrics.map((metric, index) => `
         <article class="sc-metric">
           <div class="sc-metric-top"><span>${escapeHtml(metric.label)}</span><span class="sc-mini-spark" aria-hidden="true">${["╱╲╱╱", "╲╱╱╲", "╱╱╲╱", "╲╲╱╱"][index % 4]}</span></div>
@@ -178,7 +178,7 @@ function renderStatus(status) {
 
 function renderProgress(value) {
   const number = Math.max(0, Math.min(100, Number(value || 0)));
-  return `<div class="sc-progress" aria-label="${number}% complete"><span style="width:${number}%"></span></div>`;
+  return `<div class="sc-progress" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${number}"><span style="width:${number}%"></span></div>`;
 }
 
 function renderTags(tags = []) {
@@ -191,10 +191,10 @@ function itemSearchText(item) {
 
 function renderItemCard(item, index) {
   return `
-    <article class="sc-item-card" data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}" tabindex="0" role="button" aria-label="Open ${escapeHtml(item.name)}">
+    <div class="sc-item-card" data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}" tabindex="0" role="button" aria-label="Open ${escapeHtml(item.name)}">
       <div class="sc-item-card-top">
         ${renderStatus(item.status)}
-        <button class="sc-more" type="button" aria-label="More options">•••</button>
+        <span class="sc-more" aria-hidden="true">•••</span>
       </div>
       <h3>${escapeHtml(item.name)}</h3>
       <p>${escapeHtml(item.description || "No description yet.")}</p>
@@ -204,12 +204,12 @@ function renderItemCard(item, index) {
         <span>${escapeHtml(item.due || "No due date")}</span>
       </div>
       ${renderProgress(item.progress)}
-    </article>`;
+    </div>`;
 }
 
 function renderItemRow(item, index) {
   return `
-    <article class="sc-item-row" data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}" tabindex="0" role="button" aria-label="Open ${escapeHtml(item.name)}">
+    <div class="sc-item-row" data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}" tabindex="0" role="button" aria-label="Open ${escapeHtml(item.name)}">
       <span class="sc-item-icon">${escapeHtml(item.icon || "◫")}</span>
       <div class="sc-item-name"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description || item.tags?.join(" · ") || "")}</small></div>
       ${renderStatus(item.status)}
@@ -217,23 +217,23 @@ function renderItemRow(item, index) {
       <div class="sc-row-progress">${renderProgress(item.progress)}<small>${Number(item.progress || 0)}%</small></div>
       <span class="sc-due">${escapeHtml(item.due || "—")}</span>
       <span class="sc-row-arrow" aria-hidden="true">↗</span>
-    </article>`;
+    </div>`;
 }
 
 function renderTable(items) {
   return `
     <div class="sc-table-wrap">
       <table class="sc-table">
-        <thead><tr><th>Name</th><th>Status</th><th>Owner</th><th>Progress</th><th>Due</th><th></th></tr></thead>
+        <thead><tr><th>Name</th><th>Status</th><th>Owner</th><th>Progress</th><th>Due</th><th><span class="sc-sr-only">Open item</span></th></tr></thead>
         <tbody>
           ${items.map((item, index) => `
-            <tr data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}" tabindex="0" role="button" aria-label="Open ${escapeHtml(item.name)}">
+            <tr data-sc-item="${index}" data-searchable="${escapeHtml(itemSearchText(item))}">
               <td><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.tags?.join(" · ") || "")}</small></td>
               <td>${renderStatus(item.status)}</td>
               <td><span class="sc-owner"><i>${escapeHtml((item.owner || "?").split(/\s+/).map((part) => part[0]).join("").slice(0, 2))}</i>${escapeHtml(item.owner || "Unassigned")}</span></td>
               <td><div class="sc-table-progress">${renderProgress(item.progress)}<span>${Number(item.progress || 0)}%</span></div></td>
               <td>${escapeHtml(item.due || "—")}</td>
-              <td><span aria-hidden="true">↗</span></td>
+              <td><button class="sc-row-arrow" type="button" data-sc-item-open="${index}" aria-label="Open ${escapeHtml(item.name)}">↗</button></td>
             </tr>`).join("")}
         </tbody>
       </table>
@@ -298,7 +298,7 @@ function renderActivity(data, variant) {
         <div><span class="sc-section-kicker">Signal</span><h2>Recent activity</h2></div>
         <button class="sc-text-button" type="button">View all <span aria-hidden="true">↗</span></button>
       </header>
-      <div class="sc-activity-list">
+      <div class="sc-activity-list" ${variant.composition.activity === "ticker" ? 'tabindex="0" aria-label="Recent activity"' : ""}>
         ${activity.map((entry, index) => `
           <article class="sc-activity-entry">
             <span class="sc-activity-marker">${["↗", "✓", "＋", "◎"][index % 4]}</span>
@@ -559,7 +559,7 @@ export function mountSubjective(target, state) {
     }
 
     const itemElement = element.closest("[data-sc-item]");
-    if (itemElement && !element.matches("button")) {
+    if (itemElement && (!element.matches("button") || element.matches("[data-sc-item-open]"))) {
       const item = items[Number(itemElement.getAttribute("data-sc-item"))];
       if (item) {
         const dialog = target.querySelector("[data-sc-item-dialog]");
