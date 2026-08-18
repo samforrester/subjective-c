@@ -130,12 +130,19 @@ function renderCinemaChrome() {
       <small>An interface compiler experiment</small>
       <h2>What if intent<br>was the source code?</h2>
       <p>One product. Eleven realities. Stable meaning.</p>
+      <button class="sc-cinema-enter" type="button" data-sc-cinema-enter>Enter reality <span aria-hidden="true">↓</span></button>
     </section>
     <section class="sc-cinema-slate sc-cinema-outro" aria-label="Subjective C demo conclusion">
       <small>Subjective C</small>
       <h2>Intent is source code.</h2>
       <p>github.com/samforrester/subjective-c</p>
-    </section>`;
+      <button class="sc-cinema-enter" type="button" data-sc-cinema-enter>Run it again <span aria-hidden="true">↻</span></button>
+    </section>
+    <div class="sc-cinema-director" aria-label="Cinema controls">
+      <button type="button" data-sc-cinema-autoplay aria-pressed="false"><i></i> Autopilot</button>
+      <span>Use [ ] to bend reality</span>
+      <button type="button" data-sc-cinema-exit>Open the lab ↗</button>
+    </div>`;
 }
 
 function renderLogo(manifest, compact = false) {
@@ -766,6 +773,22 @@ function bindSubjective(target, state, options = {}) {
     const lensShift = element.closest("[data-sc-lens-shift]");
     if (lensShift) {
       callbacks.onInterpretationChange?.(shiftedInterpretation(state.variant, Number(lensShift.getAttribute("data-sc-lens-shift"))));
+      return;
+    }
+
+    if (element.matches("[data-sc-cinema-enter]")) {
+      document.documentElement.dataset.subjectiveCinema = "live";
+      callbacks.onCinemaPhaseChange?.("live");
+      return;
+    }
+
+    if (element.matches("[data-sc-cinema-autoplay]")) {
+      callbacks.onCinemaAutoplay?.();
+      return;
+    }
+
+    if (element.matches("[data-sc-cinema-exit]")) {
+      callbacks.onCinemaExit?.();
       return;
     }
 

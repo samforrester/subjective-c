@@ -25,6 +25,9 @@ export type RuntimeCallbacks = {
   onNoveltyChange?(value: number): void;
   onDataChange?(data: SubjectiveData): void;
   onPreferenceChange?(preferences: Readonly<RuntimePreferences>): void;
+  onCinemaPhaseChange?(phase: "intro" | "live" | "outro"): void;
+  onCinemaAutoplay?(): void;
+  onCinemaExit?(): void;
   authorizeAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
   confirmAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
   onAction?(detail: RuntimeActionDetail): unknown;

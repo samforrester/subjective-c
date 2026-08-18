@@ -183,8 +183,13 @@ const urlParameters = new URLSearchParams(location.search);
 const seedFromUrl = urlParameters.get("seed");
 const interpretationFromUrl = urlParameters.get("interpretation");
 const cinemaMode = urlParameters.get("cinema") === "1";
+const cinemaAutoplayRequested = urlParameters.get("autoplay") === "1";
+const cinemaRecording = urlParameters.get("recording") === "1";
+document.documentElement.dataset.subjectiveCinemaRecording = cinemaRecording ? "on" : "off";
 const interpretationIds = new Set(SUBJECTIVE_INTERPRETATIONS.map(({ id }) => id));
 let interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : null;
+const cinemaSequence = ["gravity-well", "dream-fold", "mission-neon", "ship-command", "muni-control", "sutro-fog", "exploratorium-lab"];
+let cinemaAutoplayTimer = null;
 
 function freshSeed() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -224,6 +229,12 @@ function setCinemaPhase(phase) {
   document.documentElement.dataset.subjectiveCinema = ["intro", "live", "outro"].includes(phase) ? phase : "live";
 }
 
+function syncCinemaControls() {
+  document.documentElement.dataset.subjectiveCinemaAutoplay = cinemaAutoplayTimer ? "on" : "off";
+  const control = document.querySelector("[data-sc-cinema-autoplay]");
+  control?.setAttribute("aria-pressed", cinemaAutoplayTimer ? "true" : "false");
+}
+
 function setInterpretation(value) {
   if (!interpretationIds.has(value)) return false;
   transition(() => {
@@ -233,13 +244,35 @@ function setInterpretation(value) {
   return true;
 }
 
+function toggleCinemaAutoplay(force) {
+  const shouldPlay = force ?? !cinemaAutoplayTimer;
+  if (cinemaAutoplayTimer) clearInterval(cinemaAutoplayTimer);
+  cinemaAutoplayTimer = null;
+  if (shouldPlay) {
+    setCinemaPhase("live");
+    cinemaAutoplayTimer = setInterval(() => {
+      const current = cinemaSequence.indexOf(interpretation);
+      setInterpretation(cinemaSequence[(current + 1 + cinemaSequence.length) % cinemaSequence.length]);
+    }, 4200);
+  }
+  syncCinemaControls();
+}
+
+function exitCinema() {
+  if (cinemaAutoplayTimer) clearInterval(cinemaAutoplayTimer);
+  urlParameters.delete("cinema");
+  urlParameters.delete("autoplay");
+  const query = urlParameters.toString();
+  location.assign(location.pathname + (query ? "?" + query : ""));
+}
+
 function render() {
   const variant = createVariant(manifest, { seed, context, novelty, interpretation: interpretation || undefined });
   const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
   document.documentElement.dataset.subjectiveVariant = variant.id;
   document.documentElement.dataset.subjectiveLayout = variant.layout;
   document.documentElement.dataset.subjectiveInterpretation = variant.theme.interpretation;
-  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret, setInterpretation, setCinemaPhase };
+  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret, setInterpretation, setCinemaPhase, toggleCinemaAutoplay, exitCinema };
   mountSubjective(target, {
     source,
     manifest,
@@ -264,6 +297,9 @@ function render() {
           seed = freshSeed();
         });
       },
+      onCinemaPhaseChange: setCinemaPhase,
+      onCinemaAutoplay: toggleCinemaAutoplay,
+      onCinemaExit: exitCinema,
       onInspectorChange(open) {
         inspectorOpen = open;
       },
@@ -309,6 +345,7 @@ function render() {
       }
     }
   });
+  syncCinemaControls();
 }
 
 function reinterpret() {
@@ -345,6 +382,9 @@ window.addEventListener("resize", () => {
 
 render();
 setCinemaPhase(cinemaMode ? "intro" : "live");
+if (cinemaMode && cinemaAutoplayRequested) {
+  setTimeout(() => toggleCinemaAutoplay(true), 1800);
+}
 
 ${dev ? `let lastBuildVersion = null;
 setInterval(async () => {
