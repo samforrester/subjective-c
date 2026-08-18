@@ -7,6 +7,7 @@ export {
   createVariant,
   createVariants,
   normalizeContext,
+  SUBJECTIVE_INTERPRETATIONS,
   variantDistance
 } from "./variant.js";
 export {

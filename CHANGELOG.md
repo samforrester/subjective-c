@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added nine pin-able San Francisco interpretation lenses spanning transit, infrastructure, science, waterfront, nightlife, and Vercel Ship-inspired command systems.
+- Added interpretation-aware layouts, palettes, language, environmental chrome, motion, and responsive behavior.
+- Added a live SF lens selector to the runtime inspector and `?interpretation=<id>` demo URLs.
+- Exported `SUBJECTIVE_INTERPRETATIONS` and added typed `interpretation` generation options.
+
 ## 0.3.0-alpha.3 — 2026-08-17
 
 - Published the source repository publicly with protected CI, secret scanning, Dependabot, and CodeQL enabled.

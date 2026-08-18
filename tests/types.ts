@@ -3,6 +3,7 @@ import {
   createDefaultComponentRegistry,
   createSubjectivePlan,
   createVariant,
+  SUBJECTIVE_INTERPRETATIONS,
   defineAction,
   defineComponentPackage,
   defineComponentRegistry,
@@ -18,7 +19,8 @@ import { SubjectiveRouterOutlet, createSubjectiveRouter } from "@subjective-c/re
 import { defineSubjectiveForm, defineSubjectiveMutation, useSubjectiveMutation } from "@subjective-c/react/forms";
 
 const manifest = compileSubjective("# Typed app\n\nBuild a project tracker.");
-const variant = createVariant(manifest, { context: { experience: "expert" } });
+const sfInterpretation: string = SUBJECTIVE_INTERPRETATIONS[0].id;
+const variant = createVariant(manifest, { context: { experience: "expert" }, interpretation: sfInterpretation });
 const action = defineAction({ id: "project-create", label: "New project", permission: "projects:create" });
 const defaults = createDefaultComponentRegistry(manifest);
 const registry = defineComponentRegistry({ components: [...defaults.components], actions: [...defaults.actions, action] });

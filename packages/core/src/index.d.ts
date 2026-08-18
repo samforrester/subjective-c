@@ -65,6 +65,10 @@ export type SubjectiveVariant = {
     radius: number;
     motion: string;
     surface: string;
+    interpretation?: string;
+    label?: string;
+    location?: string;
+    symbol?: string;
   };
   anchors: string[];
   explanation: string[];
@@ -131,8 +135,8 @@ export type SubjectivePlan = {
 export function compileSubjective(source: string, options?: Record<string, unknown>): SubjectiveManifest;
 export function parseSubjectiveSource(source: string): Record<string, unknown>;
 export function validateManifest(manifest: unknown): { valid: boolean; errors: string[] };
-export function createVariant(manifest: SubjectiveManifest, options?: { seed?: string | number; context?: SubjectiveContext; novelty?: number }): SubjectiveVariant;
-export function createVariants(manifest: SubjectiveManifest, options?: { count?: number; seed?: string | number; context?: SubjectiveContext; novelty?: number }): SubjectiveVariant[];
+export function createVariant(manifest: SubjectiveManifest, options?: { seed?: string | number; context?: SubjectiveContext; novelty?: number; interpretation?: string }): SubjectiveVariant;
+export function createVariants(manifest: SubjectiveManifest, options?: { count?: number; seed?: string | number; context?: SubjectiveContext; novelty?: number; interpretation?: string }): SubjectiveVariant[];
 export function normalizeContext(context?: SubjectiveContext): Required<SubjectiveContext>;
 export function variantDistance(left: SubjectiveVariant, right: SubjectiveVariant): number;
 export class LocalProvider { name: string; compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest>; }
@@ -154,3 +158,15 @@ export const VARIANT_SCHEMA: string;
 export const REGISTRY_SCHEMA: string;
 export const PLAN_SCHEMA: string;
 export const CAPABILITY_KINDS: readonly string[];
+export type SubjectiveInterpretation = Readonly<{
+  id: string;
+  label: string;
+  location: string;
+  symbol: string;
+  surface: string;
+  layouts: readonly string[];
+  collections: readonly string[];
+  metrics: readonly string[];
+  activity: readonly string[];
+}>;
+export const SUBJECTIVE_INTERPRETATIONS: ReadonlyArray<SubjectiveInterpretation>;

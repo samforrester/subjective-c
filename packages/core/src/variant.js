@@ -13,7 +13,27 @@ const LAYOUTS = [
 const COLLECTION_FORMS = ["grid", "rows", "table", "board"];
 const METRIC_FORMS = ["cards", "strip", "sentence", "rail"];
 const ACTIVITY_FORMS = ["feed", "ticker", "timeline", "compact"];
-const PALETTES = ["electric-ink", "warm-paper", "night-signal", "glass-mint", "soft-violet", "high-contrast"];
+export const SUBJECTIVE_INTERPRETATIONS = Object.freeze([
+  Object.freeze({ id: "muni-control", label: "Muni Control", location: "Market Street", symbol: "N", surface: "dark", layouts: ["command-center", "sidebar-workbench"], collections: ["rows", "table"], metrics: ["rail", "strip"], activity: ["ticker", "compact"] }),
+  Object.freeze({ id: "sutro-fog", label: "Sutro Fog Observatory", location: "Twin Peaks", symbol: "◉", surface: "light", layouts: ["editorial-split", "focus-stack"], collections: ["grid", "rows"], metrics: ["sentence", "cards"], activity: ["timeline", "feed"] }),
+  Object.freeze({ id: "sfo-departures", label: "SFO Departures", location: "Terminal 3", symbol: "SFO", surface: "dark", layouts: ["command-center", "topbar-gallery"], collections: ["table", "rows"], metrics: ["strip", "rail"], activity: ["ticker", "compact"] }),
+  Object.freeze({ id: "ferry-tide", label: "Ferry Tide Table", location: "Embarcadero", symbol: "≈", surface: "light", layouts: ["focus-stack", "editorial-split"], collections: ["rows", "grid"], metrics: ["sentence", "cards"], activity: ["timeline", "feed"] }),
+  Object.freeze({ id: "mission-neon", label: "Mission After Dark", location: "24th Street", symbol: "24", surface: "dark", layouts: ["spatial-board", "topbar-gallery"], collections: ["board", "grid"], metrics: ["cards", "strip"], activity: ["feed", "ticker"] }),
+  Object.freeze({ id: "golden-gate", label: "Golden Gate Load Monitor", location: "Presidio", symbol: "GG", surface: "light", layouts: ["editorial-split", "sidebar-workbench"], collections: ["table", "rows"], metrics: ["strip", "rail"], activity: ["timeline", "compact"] }),
+  Object.freeze({ id: "exploratorium-lab", label: "Exploratorium Field Lab", location: "Pier 15", symbol: "∿", surface: "dark", layouts: ["spatial-board", "command-center"], collections: ["grid", "board"], metrics: ["cards", "rail"], activity: ["feed", "timeline"] }),
+  Object.freeze({ id: "ship-command", label: "Ship Command", location: "Fort Mason", symbol: "▲", surface: "dark", layouts: ["command-center", "sidebar-workbench"], collections: ["rows", "table"], metrics: ["rail", "strip"], activity: ["compact", "ticker"] }),
+  Object.freeze({ id: "bart-platform", label: "BART Platform", location: "16th Street", symbol: "B", surface: "light", layouts: ["topbar-gallery", "focus-stack"], collections: ["rows", "table"], metrics: ["strip", "sentence"], activity: ["ticker", "compact"] })
+]);
+
+function interpretationWeights(context) {
+  return SUBJECTIVE_INTERPRETATIONS.map((value) => {
+    let weight = 3;
+    if (context.experience === "expert" && ["muni-control", "sfo-departures", "ship-command", "exploratorium-lab"].includes(value.id)) weight += 5;
+    if (context.experience === "novice" && ["bart-platform", "ferry-tide", "sutro-fog"].includes(value.id)) weight += 5;
+    if (context.device === "mobile" && ["ferry-tide", "bart-platform", "mission-neon"].includes(value.id)) weight += 4;
+    return { value, weight };
+  });
+}
 
 export function normalizeContext(context = {}) {
   return {
@@ -96,15 +116,23 @@ export function createVariant(manifest, options = {}) {
   const seed = options.seed ?? `${manifest?.source?.hash || "subjective"}:${context.experience}:${context.device}:${context.locale}`;
   const numericSeed = seedToNumber(seed);
   const random = createRandom(numericSeed);
+  const requestedInterpretation = options.interpretation == null
+    ? null
+    : SUBJECTIVE_INTERPRETATIONS.find(({ id }) => id === options.interpretation);
+  if (options.interpretation != null && !requestedInterpretation) {
+    throw new Error(`Unknown Subjective C interpretation: ${options.interpretation}.`);
+  }
+  const interpretation = requestedInterpretation || weightedPick(random, interpretationWeights(context));
 
-  let layout = weightedPick(random, layoutWeights(context));
+  let layout = novelty >= 0.45 ? pick(random, interpretation.layouts) : weightedPick(random, layoutWeights(context));
+  if (context.device === "mobile") layout = "focus-stack";
   if (novelty < 0.2) layout = context.experience === "expert" ? "sidebar-workbench" : "topbar-gallery";
 
   const density = chooseDensity(context, manifest, random);
-  const collection = chooseCollectionForm(layout, context, random);
-  const metrics = layout === "command-center" ? "rail" : pick(random, METRIC_FORMS);
-  const activity = pick(random, ACTIVITY_FORMS);
-  const palette = context.contrast === "high" ? "high-contrast" : pick(random, PALETTES);
+  const collection = novelty >= 0.45 ? pick(random, interpretation.collections) : chooseCollectionForm(layout, context, random);
+  const metrics = novelty >= 0.45 ? pick(random, interpretation.metrics) : layout === "command-center" ? "rail" : pick(random, METRIC_FORMS);
+  const activity = novelty >= 0.45 ? pick(random, interpretation.activity) : pick(random, ACTIVITY_FORMS);
+  const palette = context.contrast === "high" ? "high-contrast" : interpretation.id;
   const hue = Math.floor(random() * 330 + 10);
   const radius = density === "compact" ? Math.floor(random() * 8 + 8) : Math.floor(random() * 14 + 14);
   const sectionSequence = sectionOrder(random, novelty, context);
@@ -122,10 +150,11 @@ export function createVariant(manifest, options = {}) {
     context.device === "mobile"
       ? "Collapsed the composition into a touch-friendly stack."
       : `Selected a ${layout.replace(/-/g, " ")} composition for this interpretation.`,
+    `Translated the intent through ${interpretation.label}, inspired by ${interpretation.location} in San Francisco.`,
     `Kept ${manifest.policies.anchors.join(", ")} stable while allowing the surrounding composition to vary.`
   ];
 
-  const signature = JSON.stringify({ numericSeed, layout, density, collection, metrics, activity, palette, hue, radius, sectionSequence, copyMode });
+  const signature = JSON.stringify({ numericSeed, interpretation: interpretation.id, layout, density, collection, metrics, activity, palette, hue, radius, sectionSequence, copyMode });
 
   return {
     schema: VARIANT_SCHEMA,
@@ -149,7 +178,11 @@ export function createVariant(manifest, options = {}) {
       hue,
       radius,
       motion,
-      surface: palette === "night-signal" || palette === "electric-ink" ? "dark" : "light"
+      surface: context.contrast === "high" ? "light" : interpretation.surface,
+      interpretation: interpretation.id,
+      label: interpretation.label,
+      location: interpretation.location,
+      symbol: interpretation.symbol
     },
     anchors: manifest.policies.anchors,
     explanation

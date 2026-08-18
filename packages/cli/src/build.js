@@ -151,7 +151,7 @@ function browserEntry({ source, manifest, data, config, registry, themeTokens, d
     }
   };
 
-  return `import { compileSubjective, createSubjectivePlan, createVariant } from "./_subjective/core/index.js";
+  return `import { compileSubjective, createSubjectivePlan, createVariant, SUBJECTIVE_INTERPRETATIONS } from "./_subjective/core/index.js";
 import { createPreferenceStore, mountSubjective } from "./_subjective/runtime/browser.js";
 
 let source = ${JSON.stringify(source)};
@@ -179,7 +179,11 @@ const devtools = ${JSON.stringify(safeConfig.devtools)};
 const themeTokens = ${JSON.stringify(safeConfig.themeTokens, null, 2)};
 const preferenceStore = createPreferenceStore();
 let preferences = { ...${JSON.stringify(safeConfig.preferences, null, 2)}, ...preferenceStore.load() };
-const seedFromUrl = new URLSearchParams(location.search).get("seed");
+const urlParameters = new URLSearchParams(location.search);
+const seedFromUrl = urlParameters.get("seed");
+const interpretationFromUrl = urlParameters.get("interpretation");
+const interpretationIds = new Set(SUBJECTIVE_INTERPRETATIONS.map(({ id }) => id));
+let interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : null;
 
 function freshSeed() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -203,11 +207,12 @@ function persistSeed() {
 }
 
 function render() {
-  const variant = createVariant(manifest, { seed, context, novelty });
+  const variant = createVariant(manifest, { seed, context, novelty, interpretation: interpretation || undefined });
   const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
   document.documentElement.dataset.subjectiveVariant = variant.id;
   document.documentElement.dataset.subjectiveLayout = variant.layout;
-  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, preferences, reinterpret };
+  document.documentElement.dataset.subjectiveInterpretation = variant.theme.interpretation;
+  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret };
   mountSubjective(target, {
     source,
     manifest,
@@ -221,6 +226,11 @@ function render() {
     themeTokens,
     callbacks: {
       onRegenerate: reinterpret,
+      onInterpretationChange(value) {
+        interpretation = value;
+        seed = freshSeed();
+        render();
+      },
       onInspectorChange(open) {
         inspectorOpen = open;
       },

@@ -6,6 +6,17 @@ const PREFERENCE_VALUES = Object.freeze({
 });
 const SAFE_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const SAFE_TOKEN_VALUE = /^[^;{}<>]*$/;
+const INTERPRETATION_OPTIONS = Object.freeze([
+  ["muni-control", "Muni Control"],
+  ["sutro-fog", "Sutro Fog Observatory"],
+  ["sfo-departures", "SFO Departures"],
+  ["ferry-tide", "Ferry Tide Table"],
+  ["mission-neon", "Mission After Dark"],
+  ["golden-gate", "Golden Gate Load Monitor"],
+  ["exploratorium-lab", "Exploratorium Field Lab"],
+  ["ship-command", "Ship Command"],
+  ["bart-platform", "BART Platform"]
+]);
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -53,6 +64,30 @@ function getCapability(manifest, kind) {
   return manifest.capabilities.find((capability) => capability.kind === kind);
 }
 
+function interpretationMeta(variant) {
+  return {
+    id: variant.theme?.interpretation || variant.theme?.palette || "subjective-sf",
+    label: variant.theme?.label || "SF Signal Deck",
+    location: variant.theme?.location || "San Francisco",
+    symbol: variant.theme?.symbol || "SF"
+  };
+}
+
+function interpretationCopy(variant) {
+  const id = interpretationMeta(variant).id;
+  return {
+    "muni-control": { collection: "Active lines", activity: "Dispatch wire", signal: "Service advisory", hero: "Network operations" },
+    "sutro-fog": { collection: "Signals through the fog", activity: "Atmospheric record", signal: "Visibility forecast", hero: "Fog observatory" },
+    "sfo-departures": { collection: "Departures", activity: "Tower log", signal: "Operations notice", hero: "Departure control" },
+    "ferry-tide": { collection: "Crossings", activity: "Harbor log", signal: "Tide signal", hero: "Waterfront schedule" },
+    "mission-neon": { collection: "Night signals", activity: "Street transmission", signal: "Live frequency", hero: "After-dark network" },
+    "golden-gate": { collection: "Structural spans", activity: "Sensor record", signal: "Load advisory", hero: "Bridge monitor" },
+    "exploratorium-lab": { collection: "Field experiments", activity: "Observation log", signal: "Instrument reading", hero: "Public laboratory" },
+    "ship-command": { collection: "Active deployments", activity: "Ship log", signal: "Command signal", hero: "Release command" },
+    "bart-platform": { collection: "Platform arrivals", activity: "System messages", signal: "Platform notice", hero: "Regional wayfinder" }
+  }[id] || { collection: "Current workspace", activity: "Recent activity", signal: "Subjective signal", hero: "Adaptive runtime" };
+}
+
 function renderLogo(manifest, compact = false) {
   const initials = manifest.name
     .split(/\s+/)
@@ -92,10 +127,11 @@ function renderPrimaryAction(manifest) {
 
 function renderTopbar(manifest, variant) {
   const search = getCapability(manifest, "search");
+  const interpretation = interpretationMeta(variant);
   return `
     <header class="sc-topbar">
       <div class="sc-topbar-left">
-        ${variant.navigation === "top" ? renderLogo(manifest, true) : '<div class="sc-breadcrumb"><span>Workspace</span><b>/</b><strong>Overview</strong></div>'}
+        ${variant.navigation === "top" ? renderLogo(manifest, true) : `<div class="sc-breadcrumb"><span>SF / ${escapeHtml(interpretation.location)}</span><b>/</b><strong>${escapeHtml(interpretation.label)}</strong></div>`}
         ${variant.navigation === "top" ? renderNavigation(manifest, variant, true) : ""}
       </div>
       <div class="sc-topbar-actions">
@@ -107,6 +143,7 @@ function renderTopbar(manifest, variant) {
 }
 
 function renderSidebar(manifest, variant) {
+  const interpretation = interpretationMeta(variant);
   return `
     <aside class="sc-sidebar">
       ${renderLogo(manifest)}
@@ -114,7 +151,7 @@ function renderSidebar(manifest, variant) {
       <div class="sc-sidebar-spacer"></div>
       <div class="sc-sidebar-note">
         <span class="sc-live-dot" aria-hidden="true"></span>
-        <div><strong>Adaptive runtime</strong><small>Variant ${escapeHtml(variant.id)}</small></div>
+        <div><strong>${escapeHtml(interpretation.label)}</strong><small>${escapeHtml(interpretation.location)} · ${escapeHtml(variant.id)}</small></div>
       </div>
       <button class="sc-user-card" type="button">
         <span class="sc-avatar">DY</span>
@@ -130,12 +167,14 @@ function renderHero(manifest, variant) {
   const title = variant.composition.hero === "welcome"
     ? `${variant.context.experience === "novice" ? "Let’s get oriented" : "Good afternoon"}.`
     : manifest.name;
+  const interpretation = interpretationMeta(variant);
+  const copy = interpretationCopy(variant);
 
   if (variant.composition.hero === "compact") {
     return `
       <section class="sc-hero sc-hero-compact" id="overview">
         <div>
-          <span class="sc-eyebrow">${escapeHtml(manifest.intent.audience[0])}</span>
+          <span class="sc-eyebrow">SF / ${escapeHtml(interpretation.location)} · ${escapeHtml(copy.hero)}</span>
           <h1>${escapeHtml(title)}</h1>
         </div>
         <p>${escapeHtml(goal)}</p>
@@ -148,7 +187,7 @@ function renderHero(manifest, variant) {
       <section class="sc-hero sc-hero-statement" id="overview">
         <div class="sc-hero-index">0${manifest.navigation.length}</div>
         <div>
-          <span class="sc-eyebrow">Intent / ${escapeHtml(variant.context.experience)}</span>
+          <span class="sc-eyebrow">${escapeHtml(interpretation.symbol)} / ${escapeHtml(interpretation.label)} / ${escapeHtml(variant.context.experience)}</span>
           <h1>${escapeHtml(goal)}</h1>
           <div class="sc-intent-pills">${tone.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
         </div>
@@ -159,15 +198,15 @@ function renderHero(manifest, variant) {
   return `
     <section class="sc-hero sc-hero-welcome" id="overview">
       <div class="sc-hero-copy">
-        <span class="sc-eyebrow">A contextual interpretation for ${escapeHtml(variant.context.experience)} users</span>
+        <span class="sc-eyebrow">${escapeHtml(interpretation.symbol)} · ${escapeHtml(interpretation.label)} · ${escapeHtml(interpretation.location)}</span>
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(goal)}</p>
         ${variant.composition.copyMode === "explanatory" ? `<div class="sc-guidance"><span>↳</span> Start with the primary action or explore the work already in motion.</div>` : ""}
       </div>
       <div class="sc-hero-signal" aria-label="Current interpretation">
-        <span>Interpretation</span>
-        <strong>${escapeHtml(variant.id.replace("v-", "#"))}</strong>
-        <small>${escapeHtml(variant.layout.replace(/-/g, " "))}</small>
+        <span>SF interpretation</span>
+        <strong>${escapeHtml(interpretation.symbol)}</strong>
+        <small>${escapeHtml(interpretation.label)} · ${escapeHtml(variant.layout.replace(/-/g, " "))}</small>
       </div>
     </section>`;
 }
@@ -286,6 +325,7 @@ function renderCollection(manifest, data, variant) {
   const filter = getCapability(manifest, "filter");
   const search = getCapability(manifest, "search");
   const form = variant.composition.collection;
+  const copy = interpretationCopy(variant);
   const body = form === "grid"
     ? `<div class="sc-item-grid">${items.map(renderItemCard).join("")}</div>`
     : form === "rows"
@@ -298,7 +338,7 @@ function renderCollection(manifest, data, variant) {
     <section class="sc-section sc-collection sc-collection-${escapeHtml(form)}" id="${escapeHtml(slug(manifest.domain.plural))}">
       <header class="sc-section-header">
         <div>
-          <span class="sc-section-kicker">Current workspace</span>
+          <span class="sc-section-kicker">${escapeHtml(copy.collection)}</span>
           <h2>${escapeHtml(manifest.domain.plural)}</h2>
           ${variant.composition.copyMode === "explanatory" ? `<p>Everything active, organized around what needs your attention next.</p>` : ""}
         </div>
@@ -315,10 +355,11 @@ function renderCollection(manifest, data, variant) {
 function renderActivity(data, variant) {
   const activity = Array.isArray(data.activity) ? data.activity : [];
   if (!activity.length) return "";
+  const copy = interpretationCopy(variant);
   return `
     <section class="sc-section sc-activity sc-activity-${escapeHtml(variant.composition.activity)}" id="activity">
       <header class="sc-section-header">
-        <div><span class="sc-section-kicker">Signal</span><h2>Recent activity</h2></div>
+        <div><span class="sc-section-kicker">Signal</span><h2>${escapeHtml(copy.activity)}</h2></div>
         <button class="sc-text-button" type="button">View all <span aria-hidden="true">↗</span></button>
       </header>
       <div class="sc-activity-list" ${variant.composition.activity === "ticker" ? 'tabindex="0" aria-label="Recent activity"' : ""}>
@@ -341,11 +382,12 @@ function renderInsight(manifest, data, variant) {
     : complete
       ? `${complete} ${complete === 1 ? manifest.domain.singular.toLowerCase() : manifest.domain.plural.toLowerCase()} completed recently.`
       : `The workspace is moving without an obvious blocker.`;
+  const copy = interpretationCopy(variant);
   return `
     <section class="sc-section sc-insight">
       <div class="sc-insight-orb" aria-hidden="true"><span></span></div>
       <div>
-        <span class="sc-section-kicker">Subjective signal</span>
+        <span class="sc-section-kicker">${escapeHtml(copy.signal)}</span>
         <h2>${escapeHtml(message)}</h2>
         <p>This summary is placed here because the current interpretation prioritizes attention over chronology.</p>
       </div>
@@ -373,6 +415,10 @@ function renderInspector(manifest, variant, source, state) {
     capabilities: manifest.capabilities,
     policies: manifest.policies
   }, null, 2);
+  const interpretation = interpretationMeta(variant);
+  const interpretationOptions = INTERPRETATION_OPTIONS
+    .map(([id, label]) => `<option value="${id}" ${interpretation.id === id ? "selected" : ""}>${escapeHtml(label)}</option>`)
+    .join("");
   return `
     <button class="sc-inspector-fab" type="button" data-sc-inspector-toggle aria-label="Toggle Subjective C inspector">
       <span>SC</span><i></i>
@@ -385,11 +431,13 @@ function renderInspector(manifest, variant, source, state) {
       <div class="sc-inspector-scroll">
         <div class="sc-variant-identity">
           <span>Current interpretation</span>
-          <strong>${escapeHtml(variant.id)}</strong>
+          <strong>${escapeHtml(interpretation.symbol)} · ${escapeHtml(interpretation.label)}</strong>
+          <small>${escapeHtml(interpretation.location)} · ${escapeHtml(variant.id)}</small>
           <div><code>${escapeHtml(variant.layout)}</code><code>${escapeHtml(variant.density)}</code><code>${escapeHtml(variant.composition.collection)}</code></div>
         </div>
 
         <section class="sc-control-group">
+          <label><span>SF lens</span><select data-sc-interpretation><option value="">Random city signal</option>${interpretationOptions}</select></label>
           <label><span>User model</span><select data-sc-experience>${options}</select></label>
           <label><span>Novelty <output>${Math.round(variant.novelty * 100)}%</output></span><input type="range" min="0" max="1" step="0.01" value="${variant.novelty}" data-sc-novelty></label>
         </section>
@@ -532,6 +580,7 @@ export function renderSubjectiveMarkup(state) {
     throw new Error("The Subjective C plan does not match the manifest and variant.");
   }
   const preferences = normalizePreferences(state.preferences);
+  const interpretation = interpretationMeta(variant);
   const style = themeStyle(variant, state.themeTokens);
   const sections = (plan?.sectionOrder || variant.composition.sections).map((name) => renderSection(name, manifest, data, variant)).join("");
   const shellClasses = [
@@ -544,13 +593,14 @@ export function renderSubjectiveMarkup(state) {
   ].filter(Boolean).join(" ");
 
   return `
-    <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}">
-      <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}" data-sc-interpretation="${escapeHtml(interpretation.id)}">
+      <div class="sc-city-chrome" aria-hidden="true"><span>37.7749° N / 122.4194° W</span><strong>${escapeHtml(interpretation.symbol)}</strong><span>${escapeHtml(interpretation.location)} / LIVE</span></div>
+      <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
       ${variant.navigation === "side" ? renderSidebar(manifest, variant) : ""}
       <div class="sc-app-frame">
         ${renderTopbar(manifest, variant)}
         <main class="sc-main">${sections}</main>
-        <footer class="sc-app-footer"><span>${escapeHtml(manifest.name)}</span><span>Intent compiled by Subjective C · ${escapeHtml(variant.id)}</span></footer>
+        <footer class="sc-app-footer"><span>SF / ${escapeHtml(interpretation.label)}</span><span>${escapeHtml(manifest.name)} · Intent compiled by Subjective C · ${escapeHtml(variant.id)}</span></footer>
       </div>
       ${devtools ? renderInspector(manifest, variant, source, { locked, inspectorOpen: state.inspectorOpen, preferences }) : ""}
       ${renderCreateDialog(manifest)}
@@ -782,6 +832,7 @@ function bindSubjective(target, state, options = {}) {
   };
 
   target.onchange = (event) => {
+    if (event.target.matches("[data-sc-interpretation]")) callbacks.onInterpretationChange?.(event.target.value || null);
     if (event.target.matches("[data-sc-experience]")) callbacks.onContextChange?.({ experience: event.target.value });
     if (event.target.matches("[data-sc-novelty]")) callbacks.onNoveltyChange?.(Number(event.target.value));
     if (event.target.matches("[data-sc-preference]")) {
