@@ -76,7 +76,7 @@ Production applications can define a component registry; the alpha browser runti
 
 `@subjective-c/react` wraps the same browser runtime and verified plan rather than creating a second rendering policy. `SubjectiveProvider` owns managed runtime state and versioned preferences; `SubjectiveRoot` mounts the trusted runtime; and application-owned host callbacks remain responsible for authorization and domain behavior. The router starts independent nested loaders in parallel, aborts superseded navigation, and exposes state through React's external-store contract. Form mutations validate input, fail closed on permission and confirmation policy, and receive an abort signal.
 
-`@subjective-c/react/server` can emit a static semantic interpretation. It is intentionally non-interactive; full hydration without layout shift remains a later 0.3 milestone.
+`@subjective-c/react/server` can emit a static semantic interpretation. `SubjectiveHydratedRoot` renders the same semantic markup on the server and client, then calls `hydrateSubjective` to bind interactions without replacing matching DOM. Hydration validates both manifest and variant identity; direct runtime consumers can reject mismatches strictly, while the React adapter safely falls back to a client render. Streaming a new interpretation without layout shift remains a later 0.3 milestone.
 
 ## Build output
 

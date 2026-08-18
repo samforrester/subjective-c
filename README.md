@@ -51,6 +51,7 @@ That source compiles into a stable intent manifest. A policy engine then chooses
 - Stable context assignments by default, with explicit reinterpretation
 - A browser runtime with generated navigation, metrics, collections, activity, search, dialogs, and semantic action events
 - A React 19 adapter with managed state, trusted host callbacks, Suspense data, and static server output
+- Interactive React hydration that preserves matching server-rendered DOM identity
 - Nested route contracts with abortable parallel loaders and React outlets
 - Typed form and mutation contracts with validation and policy enforcement
 - An in-browser inspector that can edit and recompile the source
@@ -262,7 +263,7 @@ See [`docs/COMPONENT_CONTRACTS.md`](docs/COMPONENT_CONTRACTS.md) for the trusted
 
 ## Status
 
-This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action packages, fail-closed client authorization, destructive confirmation, safe preferences and tokens, React host boundaries, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs interactive SSR/hydration, additional framework adapters, service-side policy integration, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
+This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action packages, fail-closed client authorization, destructive confirmation, safe preferences and tokens, React host and hydration boundaries, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs additional framework adapters, streaming interpretation policy, service-side policy integration, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
 
 Read [`docs/ROADMAP.md`](docs/ROADMAP.md) for the path forward and [`docs/RFC-0001-INTENT-FIRST-UI.md`](docs/RFC-0001-INTENT-FIRST-UI.md) for the original technical proposal.
 

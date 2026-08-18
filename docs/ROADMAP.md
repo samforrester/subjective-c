@@ -38,6 +38,7 @@ Implemented in the first 0.3 alpha:
 
 - React 19 provider and runtime-root adapter
 - Static server-rendering primitive
+- Interactive hydration without replacing matching server DOM
 - Routing and nested layouts
 - Abortable parallel data loading contracts
 - Form and mutation contracts
@@ -45,7 +46,6 @@ Implemented in the first 0.3 alpha:
 
 Still planned:
 
-- Interactive server rendering and hydration
 - Additional framework adapters
 - Streaming interpretations without layout shift
 

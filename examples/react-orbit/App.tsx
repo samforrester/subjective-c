@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { compileSubjective, createDefaultComponentRegistry, createSubjectivePlan, createVariant } from "@subjective-c/core";
-import { SubjectiveComposition, SubjectiveProvider, createSubjectiveHost, defineReactComponentPackage, type SubjectiveReactComponentProps } from "@subjective-c/react";
+import { SubjectiveComposition, SubjectiveHydratedRoot, SubjectiveProvider, createSubjectiveHost, defineReactComponentPackage, type SubjectiveReactComponentProps } from "@subjective-c/react";
 import { defineSubjectiveForm, defineSubjectiveMutation, useSubjectiveMutation } from "@subjective-c/react/forms";
 import { SubjectiveRouterOutlet, createSubjectiveRouter } from "@subjective-c/react/router";
 import { SubjectiveStatic } from "@subjective-c/react/server";
@@ -81,4 +81,8 @@ export function App() {
 
 export function ServerPreview() {
   return <SubjectiveStatic state={runtimeState} />;
+}
+
+export function HydratedReferenceApp() {
+  return <SubjectiveProvider initialState={runtimeState} host={host}><SubjectiveHydratedRoot /></SubjectiveProvider>;
 }

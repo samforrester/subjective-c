@@ -1,6 +1,6 @@
 {
   "name": "@subjective-c/core",
-  "version": "0.3.0-alpha.1",
+  "version": "0.3.0-alpha.2",
   "description": "The Subjective C intent compiler and variation engine.",
   "type": "module",
   "exports": {

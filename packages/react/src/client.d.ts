@@ -34,6 +34,7 @@ export function defineReactComponentPackage(input: { id: string; components: Rea
 export function SubjectiveProvider(props: { initialState: RuntimeState; host?: SubjectiveHost; preferenceKey?: string; storage?: Pick<Storage, "getItem" | "setItem" | "removeItem">; children?: ReactNode }): ReactNode;
 export function useSubjective(): SubjectiveReactValue;
 export function SubjectiveRoot(props: { state?: RuntimeState; className?: string; [key: string]: unknown }): ReactNode;
+export function SubjectiveHydratedRoot(props: { state?: RuntimeState; className?: string; [key: string]: unknown }): ReactNode;
 export function SubjectiveDataBoundary(props: { data: Promise<SubjectiveData>; state: RuntimeState; className?: string; [key: string]: unknown }): ReactNode;
 export type SubjectiveActionResult = Readonly<{ ok: true; value: unknown } | { ok: false; reason: "untrusted-action" | "permission-denied" | "confirmation-declined" | "error"; error?: unknown }>;
 export function useSubjectiveAction(state?: RuntimeState): (id: string, payload?: unknown) => Promise<SubjectiveActionResult>;
