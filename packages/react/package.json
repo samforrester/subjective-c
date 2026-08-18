@@ -1,6 +1,6 @@
 {
   "name": "@subjective-c/react",
-  "version": "0.3.0-alpha.2",
+  "version": "0.3.0-alpha.3",
   "description": "React adapter for Subjective C plans and runtime state.",
   "type": "module",
   "exports": {
@@ -27,8 +27,8 @@
     "react-dom": ">=19.0.0"
   },
   "dependencies": {
-    "@subjective-c/core": "0.3.0-alpha.2",
-    "@subjective-c/runtime": "0.3.0-alpha.2"
+    "@subjective-c/core": "0.3.0-alpha.3",
+    "@subjective-c/runtime": "0.3.0-alpha.3"
   },
   "engines": { "node": ">=20.11" },
   "license": "MIT",

@@ -1,6 +1,6 @@
 # Releasing
 
-The current supported tag is `v0.3.0-alpha.2`. Do not describe the project as production-ready.
+The current supported tag is `v0.3.0-alpha.3`. Do not describe the project as production-ready.
 
 ```bash
 npm ci

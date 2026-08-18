@@ -18,5 +18,5 @@ export function logStep(symbol, label, detail = "") {
 }
 
 export function banner() {
-  return `${color.bold("Subjective C")} ${color.magenta("0.3.0-alpha.2")} ${color.dim("— intent in, interface out")}`;
+  return `${color.bold("Subjective C")} ${color.magenta("0.3.0-alpha.3")} ${color.dim("— intent in, interface out")}`;
 }

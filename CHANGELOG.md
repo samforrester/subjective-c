@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0-alpha.3 — 2026-08-17
+
+- Published the source repository publicly with protected CI, secret scanning, Dependabot, and CodeQL enabled.
+- Replaced the status slug regular expression with a bounded linear implementation.
+- Validated dynamic shell class tokens and escaped top-level class and style attributes.
+- Bounded status and search text derived from library input.
+- Added adversarial regressions for attribute injection and pathological input.
+
 ## 0.3.0-alpha.2 — 2026-08-17
 
 - Added `hydrateSubjective` to attach trusted runtime behavior to matching server-rendered markup without replacing its DOM.
