@@ -22,13 +22,15 @@ export const SUBJECTIVE_INTERPRETATIONS = Object.freeze([
   Object.freeze({ id: "golden-gate", label: "Golden Gate Load Monitor", location: "Presidio", symbol: "GG", surface: "light", layouts: ["editorial-split", "sidebar-workbench"], collections: ["table", "rows"], metrics: ["strip", "rail"], activity: ["timeline", "compact"] }),
   Object.freeze({ id: "exploratorium-lab", label: "Exploratorium Field Lab", location: "Pier 15", symbol: "∿", surface: "dark", layouts: ["spatial-board", "command-center"], collections: ["grid", "board"], metrics: ["cards", "rail"], activity: ["feed", "timeline"] }),
   Object.freeze({ id: "ship-command", label: "Ship Command", location: "Fort Mason", symbol: "▲", surface: "dark", layouts: ["command-center", "sidebar-workbench"], collections: ["rows", "table"], metrics: ["rail", "strip"], activity: ["compact", "ticker"] }),
-  Object.freeze({ id: "bart-platform", label: "BART Platform", location: "16th Street", symbol: "B", surface: "light", layouts: ["topbar-gallery", "focus-stack"], collections: ["rows", "table"], metrics: ["strip", "sentence"], activity: ["ticker", "compact"] })
+  Object.freeze({ id: "bart-platform", label: "BART Platform", location: "16th Street", symbol: "B", surface: "light", layouts: ["topbar-gallery", "focus-stack"], collections: ["rows", "table"], metrics: ["strip", "sentence"], activity: ["ticker", "compact"] }),
+  Object.freeze({ id: "gravity-well", label: "Farallon Gravity Array", location: "Lands End · T−04:17", symbol: "∞", surface: "dark", layouts: ["spatial-board", "focus-stack"], collections: ["board", "grid"], metrics: ["sentence", "rail"], activity: ["timeline", "ticker"] }),
+  Object.freeze({ id: "dream-fold", label: "Market Street Dream Fold", location: "Layer −03", symbol: "◇", surface: "dark", layouts: ["editorial-split", "spatial-board"], collections: ["grid", "board"], metrics: ["cards", "sentence"], activity: ["timeline", "feed"] })
 ]);
 
 function interpretationWeights(context) {
   return SUBJECTIVE_INTERPRETATIONS.map((value) => {
     let weight = 3;
-    if (context.experience === "expert" && ["muni-control", "sfo-departures", "ship-command", "exploratorium-lab"].includes(value.id)) weight += 5;
+    if (context.experience === "expert" && ["muni-control", "sfo-departures", "ship-command", "exploratorium-lab", "gravity-well", "dream-fold"].includes(value.id)) weight += 5;
     if (context.experience === "novice" && ["bart-platform", "ferry-tide", "sutro-fog"].includes(value.id)) weight += 5;
     if (context.device === "mobile" && ["ferry-tide", "bart-platform", "mission-neon"].includes(value.id)) weight += 4;
     return { value, weight };
