@@ -25,6 +25,8 @@ const context = await browser.newContext({
 const page = await context.newPage();
 const video = page.video();
 const webm = resolve(output, "subjective-c-x-demo.webm");
+const recordingStartedAt = Date.now();
+let authoredStartAt = recordingStartedAt;
 const pause = (milliseconds) => page.waitForTimeout(milliseconds);
 const cursorBeats = [[720, 360], [1320, 510], [1040, 730], [480, 590], [1440, 330]];
 let cursorBeat = 0;
@@ -45,6 +47,7 @@ async function enterReality(id, hold = 1200) {
 try {
   await page.goto(`${app.url}?cinema=1&seed=x-launch&interpretation=gravity-well`, { waitUntil: "domcontentloaded" });
   await page.locator(".sc-shell").waitFor();
+  authoredStartAt = Date.now();
   await pause(1450);
   await page.evaluate(() => window.SubjectiveC.setCinemaPhase("live"));
   await pause(650);
@@ -76,10 +79,12 @@ try {
 const ffmpeg = spawnSync("ffmpeg", ["-version"], { stdio: "ignore" });
 if (ffmpeg.status === 0) {
   const mp4 = resolve(output, "subjective-c-x-demo.mp4");
+  const trimSeconds = Math.max(0, (authoredStartAt - recordingStartedAt) / 1000 - 0.1).toFixed(3);
+  console.log(`◆ Trimming ${trimSeconds}s of renderer warm-up before the authored first frame`);
   const conversion = spawnSync("ffmpeg", [
-    "-y", "-i", webm,
+    "-y", "-i", webm, "-ss", trimSeconds,
     "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
-    "-shortest", "-r", "30", "-c:v", "libx264", "-profile:v", "high", "-level", "4.1",
+    "-shortest", "-t", "18", "-r", "30", "-c:v", "libx264", "-profile:v", "high", "-level", "4.1",
     "-pix_fmt", "yuv420p", "-b:v", "6M", "-maxrate", "10M", "-bufsize", "12M",
     "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", mp4
   ], { stdio: "inherit" });
