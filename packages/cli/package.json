@@ -1,6 +1,6 @@
 {
   "name": "subjective-c",
-  "version": "0.2.0-alpha.2",
+  "version": "0.3.0-alpha.1",
   "description": "The CLI for Subjective C, an intent-first adaptive UI framework.",
   "type": "module",
   "bin": {
@@ -19,8 +19,8 @@
     "README.md"
   ],
   "dependencies": {
-    "@subjective-c/core": "0.2.0-alpha.2",
-    "@subjective-c/runtime": "0.2.0-alpha.2"
+    "@subjective-c/core": "0.3.0-alpha.1",
+    "@subjective-c/runtime": "0.3.0-alpha.1"
   },
   "engines": {
     "node": ">=20.11"

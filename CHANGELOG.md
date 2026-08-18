@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0-alpha.1 — 2026-08-17
+
+- Added `@subjective-c/react` with a managed provider, client runtime root, Suspense data boundary, and static server renderer.
+- Added application-owned host contracts that preserve authorization, confirmation, action, error, and preference boundaries in React.
+- Added nested route contracts, abortable parallel route loaders, external-store subscriptions, and a React outlet.
+- Added typed form and mutation contracts with validation, cancellation, authorization, confirmation, and result state.
+- Added a strict-typed React Orbit integration example plus server, client, routing, mutation, and policy tests.
+- Versioned and hardened preference storage against unavailable or quota-limited browser storage.
+- Updated GitHub Actions to the current Node 24-based checkout and setup actions.
+
 ## 0.2.0-alpha.2 — 2026-08-17
 
 - Added application-owned component packages and validated theme-token contracts.

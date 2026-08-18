@@ -79,3 +79,16 @@ test("runtime preferences are normalized, persisted, and applied independently o
   assert.match(html, /--sc-accent:#123456/);
   assert.doesNotMatch(html, /display:none/);
 });
+
+test("the default preference store migrates the pre-versioned alpha key", () => {
+  const values = new Map([["subjective-c:preferences", JSON.stringify({ density: "compact", unsafe: "ignored" })]]);
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key)
+  };
+  const preferences = createPreferenceStore({ storage }).load();
+  assert.deepEqual(preferences, { density: "compact" });
+  assert.equal(values.has("subjective-c:preferences"), false);
+  assert.deepEqual(JSON.parse(values.get("subjective-c:preferences@1")), { density: "compact" });
+});

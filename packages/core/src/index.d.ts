@@ -89,7 +89,7 @@ export type ComponentContract = {
   slot: string;
   variant?: string;
   capabilities?: string[];
-  render?: (...args: unknown[]) => unknown;
+  render?: (...args: any[]) => unknown;
 };
 
 export type ComponentRegistry = {

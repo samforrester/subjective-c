@@ -1,6 +1,6 @@
 {
   "name": "@subjective-c/runtime",
-  "version": "0.2.0-alpha.2",
+  "version": "0.3.0-alpha.1",
   "description": "Dependency-free browser runtime for Subjective C manifests and variants.",
   "type": "module",
   "exports": {

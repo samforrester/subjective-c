@@ -72,6 +72,12 @@ The current runtime contains a reference component vocabulary:
 
 Production applications can define a component registry; the alpha browser runtime ships a reference registry for the Orbit example.
 
+### React adapter
+
+`@subjective-c/react` wraps the same browser runtime and verified plan rather than creating a second rendering policy. `SubjectiveProvider` owns managed runtime state and versioned preferences; `SubjectiveRoot` mounts the trusted runtime; and application-owned host callbacks remain responsible for authorization and domain behavior. The router starts independent nested loaders in parallel, aborts superseded navigation, and exposes state through React's external-store contract. Form mutations validate input, fail closed on permission and confirmation policy, and receive an abort signal.
+
+`@subjective-c/react/server` can emit a static semantic interpretation. It is intentionally non-interactive; full hydration without layout shift remains a later 0.3 milestone.
+
 ## Build output
 
 `subjective build` emits a static application:

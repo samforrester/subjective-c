@@ -38,7 +38,7 @@ Build a calm command center for a small product team.
 
 That source compiles into a stable intent manifest. A policy engine then chooses a layout, density, component forms, copy style, and visual treatment while preserving required actions, labels, semantics, keyboard shortcuts, and accessibility constraints.
 
-## What is included in 0.2 alpha
+## What is included in the current alpha
 
 - A dependency-free English-to-manifest compiler
 - A deterministic seeded variation engine
@@ -50,6 +50,9 @@ That source compiles into a stable intent manifest. A policy engine then chooses
 - A serializable plan that proves required capabilities remain reachable
 - Stable context assignments by default, with explicit reinterpretation
 - A browser runtime with generated navigation, metrics, collections, activity, search, dialogs, and semantic action events
+- A React 19 adapter with managed state, trusted host callbacks, Suspense data, and static server output
+- Nested route contracts with abortable parallel loaders and React outlets
+- Typed form and mutation contracts with validation and policy enforcement
 - An in-browser inspector that can edit and recompile the source
 - Persisted density, motion, and contrast preferences that survive reinterpretation
 - Runtime permission authorization and destructive-action confirmation gates
@@ -201,6 +204,7 @@ Both screenshots were compiled from the same `app.subjective` file. The expert c
 | --- | --- |
 | `@subjective-c/core` | Parsing, validation, providers, variants, component/action contracts, verified plans |
 | `@subjective-c/runtime` | Browser rendering, interaction, devtools, semantic action events |
+| `@subjective-c/react` | React provider/root bindings, static server output, routing, data, form, and mutation contracts |
 | `subjective-c` | CLI, static builds, dev server, project scaffolding |
 | `create-subjective-c` | `npm create` application bootstrapper |
 
@@ -258,7 +262,7 @@ See [`docs/COMPONENT_CONTRACTS.md`](docs/COMPONENT_CONTRACTS.md) for the trusted
 
 ## Status
 
-This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action packages, fail-closed client authorization, destructive confirmation, safe preferences and tokens, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs framework adapters, service-side policy integration, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
+This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action packages, fail-closed client authorization, destructive confirmation, safe preferences and tokens, React host boundaries, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs interactive SSR/hydration, additional framework adapters, service-side policy integration, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
 
 Read [`docs/ROADMAP.md`](docs/ROADMAP.md) for the path forward and [`docs/RFC-0001-INTENT-FIRST-UI.md`](docs/RFC-0001-INTENT-FIRST-UI.md) for the original technical proposal.
 

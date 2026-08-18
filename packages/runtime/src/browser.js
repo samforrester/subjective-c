@@ -466,18 +466,31 @@ export function normalizePreferences(input = {}) {
 }
 
 export function createPreferenceStore(options = {}) {
-  const key = options.key || "subjective-c:preferences";
-  const storage = options.storage || globalThis.localStorage;
+  const key = options.key || "subjective-c:preferences@1";
+  const legacyKey = options.legacyKey === false ? null : options.legacyKey || (options.key ? null : "subjective-c:preferences");
+  let storage = options.storage;
+  if (!storage && globalThis.window) {
+    try { storage = globalThis.window.localStorage; } catch { storage = null; }
+  }
   return Object.freeze({
     load() {
-      try { return normalizePreferences(JSON.parse(storage?.getItem(key) || "{}")); } catch { return normalizePreferences(); }
+      try {
+        const current = storage?.getItem(key);
+        if (current) return normalizePreferences(JSON.parse(current));
+        const legacy = legacyKey ? storage?.getItem(legacyKey) : null;
+        if (!legacy) return normalizePreferences();
+        const migrated = normalizePreferences(JSON.parse(legacy));
+        storage?.setItem(key, JSON.stringify(migrated));
+        storage?.removeItem(legacyKey);
+        return migrated;
+      } catch { return normalizePreferences(); }
     },
     save(preferences) {
       const normalized = normalizePreferences(preferences);
-      storage?.setItem(key, JSON.stringify(normalized));
+      try { storage?.setItem(key, JSON.stringify(normalized)); } catch {}
       return normalized;
     },
-    clear() { storage?.removeItem(key); }
+    clear() { try { storage?.removeItem(key); } catch {} }
   });
 }
 
