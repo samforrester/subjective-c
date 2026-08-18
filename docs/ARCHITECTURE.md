@@ -108,8 +108,8 @@ The same inputs must produce the same variant plan.
 
 The current alpha protects semantics through validated manifests, trusted registries, verified plans, escaped provider values, guarded output paths, atomic builds, and stable action identifiers. A production architecture should still add:
 
-- Host-enforced permission checks and destructive-action confirmation UI
-- Manifest signatures and content-security policy
+- Service-side authorization enforcement in addition to the runtime's fail-closed authorization and confirmation gates
+- Manifest signatures (static builds already ship a restrictive content-security policy)
 - Independent security and accessibility review
 - Server-side seed assignment for experiments
 - Telemetry privacy controls

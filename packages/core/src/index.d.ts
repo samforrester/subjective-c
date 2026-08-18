@@ -76,6 +76,11 @@ export type ActionContract = {
   kind?: string;
   permission?: string | null;
   destructive?: boolean;
+  confirmation?: {
+    title?: string;
+    description?: string;
+    confirmLabel?: string;
+  } | null;
   execute?: (...args: unknown[]) => unknown;
 };
 
@@ -91,6 +96,21 @@ export type ComponentRegistry = {
   schema: "subjective-c/registry@0.1";
   components: ReadonlyArray<Readonly<ComponentContract>>;
   actions: ReadonlyArray<Readonly<ActionContract>>;
+};
+
+export type ThemeTokens = Readonly<Record<string, string | number>>;
+
+export type ComponentPackage = {
+  id: string;
+  registry: ComponentRegistry;
+  themes: Readonly<Record<string, ThemeTokens>>;
+};
+
+export type SubjectiveDiagnostic = {
+  severity: "error" | "warning" | "info";
+  code: string;
+  message: string;
+  path: string | null;
 };
 
 export type SubjectivePlan = {
@@ -121,9 +141,13 @@ export function compileWithProvider(source: string, options?: Record<string, unk
 export function defineAction(contract: ActionContract): Readonly<ActionContract>;
 export function defineComponent(contract: ComponentContract): Readonly<ComponentContract>;
 export function defineComponentRegistry(input?: { components?: ComponentContract[]; actions?: ActionContract[] }): ComponentRegistry;
+export function defineThemeTokens(tokens?: Record<string, string | number>): ThemeTokens;
+export function defineComponentPackage(input: { id: string; components?: ComponentContract[]; actions?: ActionContract[]; themes?: Record<string, Record<string, string | number>> }): ComponentPackage;
 export function createDefaultComponentRegistry(manifest: SubjectiveManifest): ComponentRegistry;
 export function createSubjectivePlan(manifest: SubjectiveManifest, variant: SubjectiveVariant, options?: { registry?: ComponentRegistry }): SubjectivePlan;
 export function validatePlan(plan: unknown, manifest: SubjectiveManifest, registry: ComponentRegistry): { valid: boolean; errors: string[] };
+export function diagnoseSubjective(input: { manifest: SubjectiveManifest; registry?: ComponentRegistry; plan?: SubjectivePlan; authorizeAction?: (...args: unknown[]) => unknown }): ReadonlyArray<Readonly<SubjectiveDiagnostic>>;
+export function formatDiagnostics(diagnostics?: SubjectiveDiagnostic[]): string;
 export const SUBJECTIVE_C_VERSION: string;
 export const MANIFEST_SCHEMA: string;
 export const VARIANT_SCHEMA: string;

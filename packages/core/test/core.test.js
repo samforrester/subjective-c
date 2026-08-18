@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import {
   compileSubjective,
   compileWithProvider,
+  defineAction,
+  defineComponentPackage,
+  defineComponentRegistry,
+  diagnoseSubjective,
   createSubjectivePlan,
   createVariant,
   createVariants,
@@ -110,4 +114,34 @@ test("invalid provider output falls back to the local compiler", async () => {
 test("provider failures surface when fallback is disabled", async () => {
   const provider = { name: "broken", async compile() { throw new Error("provider unavailable"); } };
   await assert.rejects(() => compileWithProvider(source, { provider, fallback: false }), /provider unavailable/);
+});
+
+test("action contracts normalize destructive confirmation and validate permission identifiers", () => {
+  const action = defineAction({ id: "delete-project", label: "Delete project", permission: "projects:delete", destructive: true });
+  assert.equal(action.confirmation.confirmLabel, "Delete project");
+  assert.equal(action.confirmation.description, "This action may be difficult to undo.");
+  assert.throws(() => defineAction({ id: "bad-action", label: "Bad", permission: "projects delete" }), /namespaced identifier/);
+});
+
+test("component packages own frozen registries and safe theme tokens", () => {
+  const componentPackage = defineComponentPackage({
+    id: "orbit-components",
+    components: [{ id: "hero-welcome", slot: "hero", variant: "welcome", capabilities: ["create-project"] }],
+    actions: [{ id: "create-project", label: "Create project", kind: "create" }],
+    themes: { orbit: { accent: "#4422aa", "header-height": "72px" } }
+  });
+  assert.equal(componentPackage.registry.actions[0].id, "create-project");
+  assert.equal(componentPackage.themes.orbit.accent, "#4422aa");
+  assert.ok(Object.isFrozen(componentPackage.themes.orbit));
+  assert.throws(() => defineComponentPackage({ id: "unsafe", themes: { bad: { accent: "red;display:none" } } }), /unsafe value/);
+});
+
+test("diagnostics expose unreachable required capabilities before rendering", () => {
+  const manifest = compileSubjective(source);
+  const registry = defineComponentRegistry({
+    components: [{ id: "hero-welcome", slot: "hero", variant: "welcome", capabilities: [] }],
+    actions: manifest.capabilities.map((capability) => ({ ...capability }))
+  });
+  const diagnostics = diagnoseSubjective({ manifest, registry });
+  assert.ok(diagnostics.some(({ code, severity }) => code === "capability.unreachable" && severity === "error"));
 });

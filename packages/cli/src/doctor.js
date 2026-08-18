@@ -1,7 +1,7 @@
 import { constants as fsConstants } from "node:fs";
 import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
-import { compileSubjective, createSubjectivePlan, createVariant, SUBJECTIVE_C_VERSION } from "@subjective-c/core";
+import { compileSubjective, createSubjectivePlan, createVariant, diagnoseSubjective, SUBJECTIVE_C_VERSION } from "@subjective-c/core";
 import { resolveSafeOutputDirectory } from "./build.js";
 import { color, logStep } from "./terminal.js";
 import { exists, loadConfig, resolvePackageFile } from "./utils.js";
@@ -31,18 +31,21 @@ export async function doctorProject(projectDirectory) {
   try {
     const manifest = compileSubjective(await readFile(specPath, "utf8"), { ...(config.compiler || {}), novelty: config.novelty });
     const variant = createVariant(manifest, { seed: manifest.source.hash, context: { ...config.context, device: config.context?.device === "auto" ? "desktop" : config.context?.device } });
-    const plan = createSubjectivePlan(manifest, variant);
+    const registry = config.componentPackage?.registry || config.registry;
+    const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
+    const diagnostics = diagnoseSubjective({ manifest, registry, plan });
+    const errors = diagnostics.filter(({ severity }) => severity === "error");
     checks.push({
       name: "Manifest and plan contracts",
-      ok: true,
-      detail: `${manifest.schema} · ${plan.schema} · ${plan.reachableCapabilities.length} reachable capabilities`
+      ok: errors.length === 0,
+      detail: errors.length ? errors.map(({ message }) => message).join(" ") : `${manifest.schema} · ${plan.schema} · ${plan.reachableCapabilities.length} reachable capabilities · ${diagnostics.length} diagnostics`
     });
   } catch (error) {
     checks.push({ name: "Manifest and plan contracts", ok: false, detail: error.message });
   }
   const staleStages = (await readdir(project).catch(() => [])).filter((name) => name.startsWith(".subjective-stage-"));
   checks.push({ name: "No stale build staging", ok: staleStages.length === 0, detail: staleStages.length ? staleStages.join(", ") : "clean" });
-  checks.push({ name: "Framework version", ok: SUBJECTIVE_C_VERSION === "0.2.0-alpha.1", detail: SUBJECTIVE_C_VERSION });
+  checks.push({ name: "Framework version", ok: SUBJECTIVE_C_VERSION === "0.2.0-alpha.2", detail: SUBJECTIVE_C_VERSION });
   try {
     checks.push({ name: "@subjective-c/core", ok: true, detail: resolvePackageFile("@subjective-c/core") });
   } catch (error) {

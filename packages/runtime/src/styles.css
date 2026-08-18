@@ -152,6 +152,15 @@ select:focus-visible,
   --sc-shadow: none;
 }
 
+.sc-motion-reduced *,
+.sc-motion-reduced *::before,
+.sc-motion-reduced *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
 .sc-backdrop {
   position: fixed;
   inset: 0;
@@ -1743,6 +1752,17 @@ button.sc-row-arrow {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.sc-button-danger {
+  color: #fff;
+  background: var(--sc-negative);
+  border-color: var(--sc-negative);
+}
+
+.sc-confirm-dialog p {
+  color: var(--sc-muted);
+  line-height: 1.6;
 }
 
 .sc-dialog header h2 {

@@ -1,6 +1,6 @@
 # Releasing
 
-The first supported tag is `v0.2.0-alpha.1`. Do not describe the project as production-ready.
+The current supported tag is `v0.2.0-alpha.2`. Do not describe the project as production-ready.
 
 ```bash
 npm ci

@@ -21,13 +21,20 @@ export function createDefaultComponentRegistry(manifest) {
     metrics: ["cards", "strip", "sentence", "rail"],
     activity: ["feed", "ticker", "timeline", "compact"]
   };
+  const slotKinds = {
+    navigation: ["browse", "navigate"],
+    hero: ["create"],
+    collection: ["browse", "search", "filter", "sort"],
+    metrics: [],
+    activity: []
+  };
   const components = Object.entries(variants).flatMap(([slot, names]) => names.map((variant) => ({
     id: componentId(slot, variant),
     slot,
     variant,
-    capabilities: slot === "collection"
-      ? manifest.capabilities.filter(({ kind }) => ["browse", "search", "filter", "sort"].includes(kind)).map(({ id }) => id)
-      : []
+    capabilities: manifest.capabilities
+      .filter(({ kind }) => slotKinds[slot].includes(kind))
+      .map(({ id }) => id)
   })));
   const actions = manifest.capabilities.map((capability) => ({
     id: capability.id,
@@ -44,13 +51,23 @@ export function validatePlan(plan, manifest, registry) {
   if (!plan || typeof plan !== "object") return { valid: false, errors: ["Plan must be an object."] };
   if (plan.schema !== PLAN_SCHEMA) errors.push(`Plan schema must be ${PLAN_SCHEMA}.`);
   if (plan.manifestHash !== manifest?.source?.hash) errors.push("Plan manifestHash does not match the manifest.");
-  const knownComponents = new Set(registry.components.map(({ id }) => id));
+  const knownComponents = new Map(registry.components.map((component) => [component.id, component]));
   for (const [slot, selection] of Object.entries(plan.slots || {})) {
-    if (!selection?.componentId || !knownComponents.has(selection.componentId)) {
+    const component = knownComponents.get(selection?.componentId);
+    if (!component) {
       errors.push(`Plan slot ${slot} does not reference a trusted component.`);
+    } else if (component.slot !== slot || component.variant !== selection.variant) {
+      errors.push(`Plan slot ${slot} does not match trusted component ${component.id}.`);
     }
   }
+  const knownActions = new Set(registry.actions.map(({ id }) => id));
+  for (const action of plan.actions || []) {
+    if (!knownActions.has(action.id)) errors.push(`Plan action ${action.id} is not registered.`);
+  }
   const reachable = new Set(plan.reachableCapabilities || []);
+  for (const id of reachable) {
+    if (!knownActions.has(id)) errors.push(`Reachable capability ${id} is not a registered action.`);
+  }
   for (const capability of manifest?.capabilities || []) {
     if (capability.required && !reachable.has(capability.id)) {
       errors.push(`Required capability ${capability.id} is not reachable.`);
@@ -62,7 +79,7 @@ export function validatePlan(plan, manifest, registry) {
 export function createSubjectivePlan(manifest, variant, options = {}) {
   const registry = options.registry || createDefaultComponentRegistry(manifest);
   const slots = {};
-  const reachable = new Set(registry.actions.map(({ id }) => id));
+  const reachable = new Set();
   for (const [slot, select] of Object.entries(SLOT_SELECTIONS)) {
     const selectedVariant = select(variant);
     const component = registry.components.find((candidate) => candidate.slot === slot && candidate.variant === selectedVariant);
@@ -88,4 +105,3 @@ export function createSubjectivePlan(manifest, variant, options = {}) {
   if (!validation.valid) throw new Error(`Invalid Subjective C plan: ${validation.errors.join(" ")}`);
   return plan;
 }
-

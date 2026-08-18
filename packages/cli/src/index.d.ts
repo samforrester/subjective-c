@@ -1,5 +1,5 @@
-import type { SubjectiveManifest } from "@subjective-c/core";
-import type { SubjectiveData } from "@subjective-c/runtime/browser";
+import type { ComponentPackage, ComponentRegistry, SubjectiveManifest } from "@subjective-c/core";
+import type { RuntimePreferences, SubjectiveData } from "@subjective-c/runtime/browser";
 
 
 export type SubjectiveConfig = {
@@ -9,6 +9,11 @@ export type SubjectiveConfig = {
   novelty?: number;
   devtools?: boolean;
   inspectorOpen?: boolean;
+  componentPackage?: ComponentPackage;
+  registry?: ComponentRegistry;
+  theme?: string;
+  themeTokens?: Record<string, string | number>;
+  preferences?: RuntimePreferences;
   provider?: { name?: string; compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest> };
   providerFallback?: boolean;
   compiler?: Record<string, unknown>;

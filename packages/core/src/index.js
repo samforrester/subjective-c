@@ -37,5 +37,6 @@ export {
   SUBJECTIVE_C_VERSION,
   VARIANT_SCHEMA
 } from "./constants.js";
-export { defineAction, defineComponent, defineComponentRegistry } from "./contracts.js";
+export { defineAction, defineComponent, defineComponentRegistry, defineComponentPackage, defineThemeTokens } from "./contracts.js";
 export { createDefaultComponentRegistry, createSubjectivePlan, validatePlan } from "./planner.js";
+export { diagnoseSubjective, formatDiagnostics } from "./diagnostics.js";

@@ -21,7 +21,22 @@
       }
     },
     "sectionOrder": { "type": "array", "items": { "type": "string" } },
-    "actions": { "type": "array", "items": { "type": "object" } },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "kind", "permission", "destructive", "confirmation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "label": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string" },
+          "permission": { "type": ["string", "null"] },
+          "destructive": { "type": "boolean" },
+          "confirmation": { "type": ["object", "null"] }
+        },
+        "additionalProperties": false
+      }
+    },
     "reachableCapabilities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
     "invariants": {
       "type": "object",
@@ -35,4 +50,3 @@
   },
   "additionalProperties": false
 }
-

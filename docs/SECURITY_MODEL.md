@@ -15,6 +15,11 @@
 - `domain.icon` rejects markup and oversized glyphs.
 - Capability and navigation identifiers are validated and unique.
 - Required capabilities must remain reachable in every accepted plan.
+- Reachability is derived from selected component capabilities, not mere registry membership.
+- Permissioned actions fail closed unless a host authorizer explicitly returns `true`.
+- Destructive actions require normalized confirmation copy and an approval step before emission.
+- Application theme tokens reject CSS rule delimiters and unsafe identifiers.
+- Preference storage accepts only known density, motion, contrast, and safe palette values.
 - Build output defaults inside the project and rejects project root, filesystem root, and the user home directory.
 - External output requires `allowExternalOutDir: true` or `--allow-external-out-dir`.
 - Builds stage all files before atomically replacing the last successful output.
@@ -22,6 +27,6 @@
 
 ## Host responsibilities
 
-Treat `permission` and `destructive` as policy inputs, not authorization. Re-check permissions in the application or service that executes the action. Add confirmation UI for destructive operations, use a restrictive Content Security Policy, avoid secrets in generated data, and conduct an independent review before exposing sensitive workflows.
+The runtime's authorization and confirmation gates prevent accidental client-side dispatch, but they are not a service authorization boundary. Re-check permissions in the application or service that executes the action. Use a restrictive Content Security Policy, avoid secrets in generated data or preferences, and conduct an independent review before exposing sensitive workflows.
 
 Report vulnerabilities using the private process in [`../SECURITY.md`](../SECURITY.md), not a public issue.

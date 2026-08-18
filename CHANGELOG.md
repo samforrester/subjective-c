@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0-alpha.2 — 2026-08-17
+
+- Added application-owned component packages and validated theme-token contracts.
+- Added fail-closed host authorization and destructive-action confirmation before semantic action dispatch.
+- Added persisted density, motion, contrast, and palette preference APIs and inspector controls.
+- Added structured manifest, registry, permission, capability, and plan diagnostics.
+- Corrected reachability so capabilities must be exposed by selected components rather than merely registered.
+- Expanded unit, type, browser, security, semantic, and schema coverage for the new boundaries.
+
 ## 0.2.0-alpha.1 — 2026-08-17
 
 - Added policy-constrained component and action registries plus deterministic plans.

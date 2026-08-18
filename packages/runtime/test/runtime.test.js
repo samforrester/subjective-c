@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { escapeHtml, renderSubjectiveMarkup } from "../src/browser.js";
+import { createPreferenceStore, escapeHtml, normalizePreferences, renderSubjectiveMarkup } from "../src/browser.js";
 
 const manifest = {
   name: "Orbit",
@@ -59,4 +59,23 @@ test("a plan must match the current manifest and variant", () => {
     variant,
     plan: { manifestHash: "wrong", variantId: variant.id, sectionOrder: [] }
   }), /does not match/);
+});
+
+test("runtime preferences are normalized, persisted, and applied independently of a variant", () => {
+  const values = new Map();
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key)
+  };
+  const store = createPreferenceStore({ storage, key: "test" });
+  assert.deepEqual(store.save({ density: "compact", contrast: "high", palette: "bad value" }), { density: "compact", contrast: "high" });
+  assert.deepEqual(store.load(), { density: "compact", contrast: "high" });
+  assert.deepEqual(normalizePreferences({ motion: "instant", palette: "warm-paper" }), { palette: "warm-paper" });
+
+  const html = renderSubjectiveMarkup({ manifest, variant, preferences: store.load(), themeTokens: { accent: "#123456", unsafe: "red;display:none" } });
+  assert.match(html, /sc-density-compact/);
+  assert.match(html, /sc-palette-high-contrast/);
+  assert.match(html, /--sc-accent:#123456/);
+  assert.doesNotMatch(html, /display:none/);
 });

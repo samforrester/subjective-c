@@ -25,12 +25,23 @@
         "type": "object",
         "required": ["id", "label", "kind", "permission", "destructive"],
         "properties": {
-          "id": { "type": "string" },
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
           "label": { "type": "string" },
           "kind": { "type": "string" },
-          "permission": { "type": ["string", "null"] },
-          "destructive": { "type": "boolean" }
-        }
+          "permission": { "type": ["string", "null"], "pattern": "^[a-z][a-z0-9]*(?:[.:-][a-z0-9]+)*$" },
+          "destructive": { "type": "boolean" },
+          "confirmation": {
+            "type": ["object", "null"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 },
+              "confirmLabel": { "type": "string", "minLength": 1 }
+            },
+            "required": ["title", "description", "confirmLabel"],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
       }
     }
   },

@@ -64,3 +64,16 @@ Build a project tracker.
   assert.doesNotMatch(html, /<img src=x/);
   assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
 });
+
+test("buildProject serializes safe preferences and application theme tokens", async () => {
+  await writeFile(join(temporary, "subjective.config.js"), `export default {
+    novelty: 0.5,
+    preferences: { density: "compact", contrast: "high" },
+    themeTokens: { accent: "#4422aa", "header-height": "72px" }
+  };\n`, "utf8");
+  const result = await buildProject(temporary, { quiet: true });
+  const app = await readFile(join(result.outDirectory, "app.js"), "utf8");
+  assert.match(app, /"density": "compact"/);
+  assert.match(app, /"accent": "#4422aa"/);
+  assert.match(app, /createPreferenceStore/);
+});
