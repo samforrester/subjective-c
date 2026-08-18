@@ -815,6 +815,256 @@ select:focus-visible,
 @keyframes sc-cinema-type { from { opacity: 0; letter-spacing: -.16em; transform: translateY(60px); filter: blur(14px); } }
 @keyframes sc-live-pulse { to { opacity: .25; transform: scale(.7); } }
 
+/* The cinema cut is one authored SF journey, not a stack of showcase effects. */
+.sc-cinema-mode .sc-ghost-title,
+.sc-cinema-mode .sc-reality-meter,
+.sc-cinema-mode .sc-scene-nav,
+.sc-cinema-mode .sc-transmission,
+.sc-cinema-mode > .sc-city-chrome,
+.sc-cinema-mode .sc-pointer-aura,
+.sc-cinema-mode .sc-showcase-cursor {
+  display: none;
+}
+
+.sc-cinema-mode {
+  box-shadow: inset 0 22px #050506, inset 0 -22px #050506;
+}
+
+.sc-cinema-mode .sc-cinema-grain {
+  opacity: .028;
+  animation-duration: .36s;
+}
+
+.sc-cinema-mode .sc-app-frame {
+  transition: filter .8s ease, opacity .8s ease, transform 1s cubic-bezier(.16, 1, .3, 1);
+}
+
+[data-subjective-cinema="intro"] .sc-cinema-mode .sc-app-frame,
+[data-subjective-cinema="outro"] .sc-cinema-mode .sc-app-frame {
+  filter: blur(18px);
+  opacity: .2;
+  transform: scale(.96);
+}
+
+.sc-cinema-slate {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 26%, rgba(255, 84, 50, .16), transparent 24%),
+    radial-gradient(circle at 18% 84%, rgba(198, 169, 255, .14), transparent 26%),
+    #050506;
+}
+
+.sc-cinema-slate::before {
+  top: -30vh;
+  right: -18vw;
+  width: 72vw;
+  height: 120vh;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,.18);
+  border-radius: 50%;
+  box-shadow: -54px 0 0 -53px rgba(255,255,255,.12), -108px 0 0 -107px rgba(255,255,255,.08), -162px 0 0 -161px rgba(255,255,255,.05);
+  animation: sc-bridge-breathe 8s ease-in-out infinite alternate;
+}
+
+.sc-cinema-slate::after {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 7vw 7vw;
+  mask-image: linear-gradient(135deg, #000, transparent 62%);
+  content: "";
+  pointer-events: none;
+}
+
+.sc-cinema-slate h2 {
+  max-width: 1200px;
+  margin: 30px 0 26px;
+  font-size: clamp(68px, 10vw, 174px);
+  line-height: .76;
+}
+
+.sc-cinema-slate p {
+  max-width: 720px;
+  line-height: 1.55;
+}
+
+.sc-cinema-proof {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(760px, 86vw);
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 38px;
+  border-block: 1px solid rgba(255,255,255,.14);
+}
+
+.sc-cinema-proof span {
+  display: grid;
+  gap: 5px;
+  padding: 18px 12px;
+  color: #8c8c91;
+  font: 700 8px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.sc-cinema-proof span + span { border-left: 1px solid rgba(255,255,255,.14); }
+.sc-cinema-proof b { color: #fff; font-size: 20px; letter-spacing: -.03em; }
+
+.sc-city-chapter {
+  position: fixed;
+  top: clamp(92px, 13vh, 150px);
+  left: clamp(26px, 5vw, 86px);
+  z-index: 128;
+  width: min(660px, 46vw);
+  color: var(--sc-text);
+  pointer-events: none;
+}
+
+.sc-city-chapter-kicker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  color: color-mix(in srgb, var(--sc-text) 58%, transparent);
+  font: 800 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.sc-city-chapter-kicker span:first-child {
+  padding: 7px 9px;
+  color: var(--sc-on-accent);
+  background: var(--sc-accent);
+}
+
+.sc-city-chapter-kicker span + span::before {
+  margin-right: 16px;
+  color: var(--sc-accent);
+  content: "/";
+}
+
+.sc-city-chapter h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(48px, 5.3vw, 92px);
+  line-height: .84;
+  letter-spacing: -.075em;
+  text-wrap: balance;
+  animation: sc-chapter-arrive .85s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.sc-city-chapter p {
+  max-width: 500px;
+  margin: 24px 0 0;
+  color: color-mix(in srgb, var(--sc-text) 68%, transparent);
+  font-size: clamp(13px, 1.15vw, 17px);
+  line-height: 1.55;
+  animation: sc-chapter-arrive 1s .08s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+[data-subjective-cinema="intro"] .sc-city-chapter,
+[data-subjective-cinema="outro"] .sc-city-chapter,
+[data-subjective-cinema="intro"] .sc-city-journey,
+[data-subjective-cinema="outro"] .sc-city-journey {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.sc-city-journey {
+  position: fixed;
+  right: clamp(24px, 4vw, 68px);
+  bottom: 52px;
+  left: clamp(24px, 4vw, 68px);
+  z-index: 136;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+  padding: 14px 16px 10px;
+  border: 1px solid color-mix(in srgb, var(--sc-text) 16%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--sc-panel-solid) 76%, transparent);
+  box-shadow: 0 20px 70px rgba(0,0,0,.22);
+  backdrop-filter: blur(28px) saturate(1.25);
+  transition: opacity .5s ease, visibility .5s;
+}
+
+.sc-city-route {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(64px, 1fr));
+  gap: 0;
+}
+
+.sc-city-route::before {
+  position: absolute;
+  top: 7px;
+  right: 6%;
+  left: 6%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--sc-accent), color-mix(in srgb, var(--sc-accent) 35%, var(--sc-line)));
+  content: "";
+}
+
+.sc-city-route button {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 6px;
+  border: 0;
+  color: color-mix(in srgb, var(--sc-text) 48%, transparent);
+  background: transparent;
+  font: 800 7px/1.15 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sc-city-route button i {
+  position: relative;
+  z-index: 1;
+  width: 15px;
+  height: 15px;
+  border: 4px solid color-mix(in srgb, var(--sc-panel-solid) 94%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sc-text) 32%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sc-text) 18%, transparent);
+  transition: background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+
+.sc-city-route button:hover,
+.sc-city-route button:focus-visible,
+.sc-city-route button.is-active { color: var(--sc-text); }
+.sc-city-route button:hover i,
+.sc-city-route button:focus-visible i { transform: scale(1.25); }
+.sc-city-route button.is-active i { background: var(--sc-accent); box-shadow: 0 0 0 1px var(--sc-accent), 0 0 24px var(--sc-accent); transform: scale(1.25); }
+
+.sc-city-journey .sc-cinema-director {
+  position: static;
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: none;
+  backdrop-filter: none;
+}
+
+[data-subjective-cinema="live"] .sc-city-journey .sc-cinema-director { display: flex; }
+[data-subjective-cinema-recording="on"] .sc-city-journey { grid-template-columns: 1fr; }
+[data-subjective-cinema-recording="on"] .sc-city-journey .sc-cinema-director { display: none; }
+
+@keyframes sc-chapter-arrive {
+  from { opacity: 0; transform: translateY(34px); filter: blur(10px); }
+}
+
+@keyframes sc-bridge-breathe {
+  to { transform: translateX(-4vw) rotate(3deg); }
+}
+
 .sc-city-chrome {
   position: fixed;
   top: 8px;
@@ -2782,6 +3032,57 @@ button.sc-row-arrow {
 }
 
 @media (max-width: 820px) {
+  .sc-cinema-mode .sc-main {
+    padding-top: 340px;
+  }
+
+  .sc-cinema-mode .sc-main > .sc-hero {
+    display: none;
+  }
+
+  .sc-city-chapter {
+    top: 88px;
+    right: 22px;
+    left: 22px;
+    width: auto;
+    padding: 16px 0 52px;
+    background: var(--sc-bg);
+    box-shadow: 0 24px 34px var(--sc-bg);
+  }
+
+  .sc-city-chapter-kicker { gap: 8px; }
+  .sc-city-chapter-kicker span + span::before { margin-right: 8px; }
+  .sc-city-chapter-kicker span:last-child { display: none; }
+  .sc-city-chapter h2 { max-width: 10ch; font-size: clamp(44px, 13vw, 72px); }
+  .sc-city-chapter p { max-width: 38ch; font-size: 12px; }
+
+  .sc-city-journey {
+    right: 10px;
+    bottom: 38px;
+    left: 10px;
+    display: block;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .sc-city-route {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .sc-city-route::-webkit-scrollbar { display: none; }
+  .sc-city-route::before { right: 24px; left: 24px; width: 580px; }
+  .sc-city-route button { min-width: 70px; }
+  .sc-city-journey .sc-cinema-director { justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--sc-line); padding-top: 8px; }
+
+  .sc-cinema-proof { grid-template-columns: repeat(2, 1fr); margin-top: 24px; }
+  .sc-cinema-proof span:nth-child(3) { border-left: 0; border-top: 1px solid rgba(255,255,255,.14); }
+  .sc-cinema-proof span:nth-child(4) { border-top: 1px solid rgba(255,255,255,.14); }
+  .sc-cinema-slate p { max-width: 38ch; }
+
   .sc-cinema-director {
     right: 8px;
     bottom: 72px;
