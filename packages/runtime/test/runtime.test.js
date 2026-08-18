@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createPreferenceStore, escapeHtml, normalizePreferences, renderSubjectiveMarkup } from "../src/browser.js";
+import { JSDOM } from "jsdom";
+import { createPreferenceStore, escapeHtml, hydrateSubjective, normalizePreferences, renderSubjectiveMarkup } from "../src/browser.js";
 
 const manifest = {
   name: "Orbit",
@@ -91,4 +92,43 @@ test("the default preference store migrates the pre-versioned alpha key", () => 
   assert.deepEqual(preferences, { density: "compact" });
   assert.equal(values.has("subjective-c:preferences"), false);
   assert.deepEqual(JSON.parse(values.get("subjective-c:preferences@1")), { density: "compact" });
+});
+
+test("hydrateSubjective binds existing server markup without replacing its DOM", async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: "https://subjective-c.test" });
+  const previous = Object.fromEntries(["window", "document", "Element", "CustomEvent", "FormData"].map((key) => [key, globalThis[key]]));
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    Element: dom.window.Element,
+    CustomEvent: dom.window.CustomEvent,
+    FormData: dom.window.FormData
+  });
+  const target = document.querySelector("#root");
+  target.innerHTML = renderSubjectiveMarkup({ manifest, variant, data: {} });
+  const serverShell = target.firstElementChild;
+  let actions = 0;
+  let controller = hydrateSubjective(target, { manifest, variant, data: {}, callbacks: { onAction: () => actions++ } });
+  let fallbackController;
+  try {
+    assert.equal(target.firstElementChild, serverShell);
+    target.querySelector('[data-sc-action-kind="create"]').click();
+    await Promise.resolve();
+    assert.equal(actions, 1);
+    assert.throws(() => hydrateSubjective(target, { manifest, variant: { ...variant, id: "v-mismatch" } }, { fallback: false }), /does not match/);
+    controller.destroy();
+    controller = null;
+    assert.equal(target.firstElementChild, serverShell);
+    fallbackController = hydrateSubjective(target, { manifest, variant: { ...variant, id: "v-mismatch" }, data: {} });
+    assert.notEqual(target.firstElementChild, serverShell);
+    assert.equal(target.firstElementChild.getAttribute("data-sc-variant"), "v-mismatch");
+  } finally {
+    controller?.destroy();
+    fallbackController?.destroy();
+    dom.window.close();
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+  }
 });

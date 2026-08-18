@@ -26,5 +26,5 @@ for (const [name, budget] of packages) {
 }
 
 if (!root.private) throw new Error("The monorepo root must remain private.");
-if (root.version !== "0.3.0-alpha.1") throw new Error("Unexpected release version.");
+if (root.version !== "0.3.0-alpha.2") throw new Error("Unexpected release version.");
 console.log("✓ release metadata and package contents verified");

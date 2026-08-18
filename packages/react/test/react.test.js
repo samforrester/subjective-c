@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { act, createElement } from "react";
-import { createRoot } from "react-dom/client";
-import { renderToStaticMarkup } from "react-dom/server";
+import { createRoot, hydrateRoot } from "react-dom/client";
+import { renderToStaticMarkup, renderToString } from "react-dom/server";
 import { JSDOM } from "jsdom";
 import { compileSubjective, createDefaultComponentRegistry, createSubjectivePlan, createVariant } from "@subjective-c/core";
-import { SubjectiveComposition, SubjectiveProvider, SubjectiveRoot, createSubjectiveHost, defineReactComponentPackage, useSubjective, useSubjectiveAction } from "../src/client.js";
+import { SubjectiveComposition, SubjectiveHydratedRoot, SubjectiveProvider, SubjectiveRoot, createSubjectiveHost, defineReactComponentPackage, useSubjective, useSubjectiveAction } from "../src/client.js";
 import { SubjectiveStatic } from "../src/server.js";
 import { SubjectiveRouterOutlet, createSubjectiveRouter, defineSubjectiveRoute } from "../src/router.js";
 import { defineMutationRegistry, defineSubjectiveForm, defineSubjectiveMutation, useSubjectiveMutation } from "../src/forms.js";
@@ -30,7 +30,7 @@ test("SubjectiveStatic server-renders a complete trusted interpretation", () => 
   assert.doesNotMatch(html, /runtime inspector/);
 });
 
-test("SubjectiveProvider exposes stable managed state during server rendering", () => {
+test("SubjectiveProvider keeps its initial server tree independent of browser storage", () => {
   const values = new Map([["react-test", JSON.stringify({ density: "compact" })]]);
   const storage = {
     getItem: (key) => values.get(key) ?? null,
@@ -39,7 +39,7 @@ test("SubjectiveProvider exposes stable managed state during server rendering", 
   };
   function Probe() {
     const subjective = useSubjective();
-    return createElement("span", null, `${subjective.state.manifest.name}:${subjective.state.preferences.density}`);
+    return createElement("span", null, `${subjective.state.manifest.name}:${subjective.state.preferences.density || "adaptive"}`);
   }
   const html = renderToStaticMarkup(createElement(SubjectiveProvider, {
     initialState: state,
@@ -47,7 +47,7 @@ test("SubjectiveProvider exposes stable managed state during server rendering", 
     storage,
     children: createElement(Probe)
   }));
-  assert.equal(html, "<span>React Orbit:compact</span>");
+  assert.equal(html, "<span>React Orbit:adaptive</span>");
 });
 
 test("React host contracts reject invalid handlers and preserve policy callbacks", async () => {
@@ -90,6 +90,44 @@ test("SubjectiveComposition renders only application-owned components selected b
   assert.throws(() => defineReactComponentPackage({ id: "missing-render", components: [{ id: "hero", slot: "hero" }] }), /render function/);
 });
 
+test("SubjectiveHydratedRoot preserves server DOM identity while attaching interactions", async () => {
+  let performed = 0;
+  const host = createSubjectiveHost({ performAction: () => performed++ });
+  const app = createElement(SubjectiveProvider, { initialState: state, host }, createElement(SubjectiveHydratedRoot));
+  const serverHtml = renderToString(app);
+  const dom = new JSDOM(`<!doctype html><div id="root">${serverHtml}</div>`, { url: "https://subjective-c.test" });
+  const previous = Object.fromEntries(["window", "document", "Element", "HTMLElement", "CustomEvent", "FormData"].map((key) => [key, globalThis[key]]));
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    Element: dom.window.Element,
+    HTMLElement: dom.window.HTMLElement,
+    CustomEvent: dom.window.CustomEvent,
+    FormData: dom.window.FormData,
+    IS_REACT_ACT_ENVIRONMENT: true
+  });
+  const rootElement = document.querySelector("#root");
+  const serverShell = rootElement.querySelector(".sc-shell");
+  let root;
+  try {
+    await act(async () => { root = hydrateRoot(rootElement, app); });
+    assert.equal(rootElement.querySelector(".sc-shell"), serverShell);
+    await act(async () => {
+      rootElement.querySelector('[data-sc-action-kind="create"]').click();
+      await Promise.resolve();
+    });
+    assert.equal(performed, 1);
+  } finally {
+    if (root) await act(async () => root.unmount());
+    dom.window.close();
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+    delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+  }
+});
+
 test("the React client mounts the runtime, persists preferences, and preserves fail-closed authorization", async () => {
   const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: "https://subjective-c.test" });
   const previous = Object.fromEntries(["window", "document", "Element", "HTMLElement", "CustomEvent", "FormData"].map((key) => [key, globalThis[key]]));
@@ -103,6 +141,7 @@ test("the React client mounts the runtime, persists preferences, and preserves f
     IS_REACT_ACT_ENVIRONMENT: true
   });
   const actionId = manifest.capabilities.find(({ kind }) => kind === "create").id;
+  dom.window.localStorage.setItem("subjective-c:react-preferences@1", JSON.stringify({ density: "compact" }));
   const securedState = {
     ...state,
     plan: {
@@ -133,9 +172,10 @@ test("the React client mounts the runtime, persists preferences, and preserves f
   try {
     await act(async () => root.render(createElement(SubjectiveProvider, { initialState: securedState, host, storage: dom.window.localStorage }, createElement(App))));
     assert.ok(document.querySelector(".sc-shell"));
-    await act(async () => subjective.setPreferences({ density: "compact" }));
     assert.ok(document.querySelector(".sc-shell").classList.contains("sc-density-compact"));
-    assert.equal(JSON.parse(dom.window.localStorage.getItem("subjective-c:react-preferences@1")).density, "compact");
+    await act(async () => subjective.setPreferences({ density: "comfortable" }));
+    assert.ok(document.querySelector(".sc-shell").classList.contains("sc-density-comfortable"));
+    assert.equal(JSON.parse(dom.window.localStorage.getItem("subjective-c:react-preferences@1")).density, "comfortable");
     await act(async () => {
       document.querySelector(`[data-sc-action="${actionId}"]`).click();
       await Promise.resolve();

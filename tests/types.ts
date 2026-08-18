@@ -12,7 +12,7 @@ import {
 import { createPreferenceStore, renderSubjectiveMarkup, type RuntimeState } from "@subjective-c/runtime/browser";
 import { defineConfig } from "subjective-c";
 import { createElement } from "react";
-import { SubjectiveComposition, SubjectiveProvider, SubjectiveRoot, createSubjectiveHost, useSubjective } from "@subjective-c/react";
+import { SubjectiveComposition, SubjectiveHydratedRoot, SubjectiveProvider, SubjectiveRoot, createSubjectiveHost, useSubjective } from "@subjective-c/react";
 import { SubjectiveStatic } from "@subjective-c/react/server";
 import { SubjectiveRouterOutlet, createSubjectiveRouter } from "@subjective-c/react/router";
 import { defineSubjectiveForm, defineSubjectiveMutation, useSubjectiveMutation } from "@subjective-c/react/forms";
@@ -33,6 +33,7 @@ defineConfig({ novelty: 0.5, allowExternalOutDir: false });
 
 const host = createSubjectiveHost({ authorizeAction: ({ permission }) => permission === "projects:create" });
 createElement(SubjectiveProvider, { initialState: state, host }, createElement(SubjectiveRoot));
+createElement(SubjectiveProvider, { initialState: state, host }, createElement(SubjectiveHydratedRoot));
 createElement(SubjectiveStatic, { state });
 createElement(SubjectiveComposition, { registry, state });
 void useSubjective;

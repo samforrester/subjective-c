@@ -13,7 +13,7 @@ import {
   useRef,
   useState
 } from "react";
-import { createPreferenceStore, mountSubjective, normalizePreferences } from "@subjective-c/runtime/browser";
+import { createPreferenceStore, hydrateSubjective, mountSubjective, normalizePreferences, renderSubjectiveMarkup } from "@subjective-c/runtime/browser";
 import { defineComponentPackage } from "@subjective-c/core";
 
 const SubjectiveReactContext = createContext(null);
@@ -52,7 +52,7 @@ export function SubjectiveProvider({ initialState, host = createSubjectiveHost()
   const preferenceStore = useMemo(() => createPreferenceStore({ key: preferenceKey, storage }), [preferenceKey, storage]);
   const [runtimeState, setRuntimeState] = useState(() => ({
     ...initialState,
-    preferences: normalizePreferences({ ...initialState.preferences, ...preferenceStore.load() })
+    preferences: normalizePreferences(initialState.preferences)
   }));
   const callbacksRef = useRef(initialState.callbacks || {});
   const hostRef = useRef(host);
@@ -70,6 +70,12 @@ export function SubjectiveProvider({ initialState, host = createSubjectiveHost()
     callbacksRef.current.onPreferenceChange?.(saved);
     return saved;
   }, [preferenceStore, updateState]);
+  useClientLayoutEffect(() => {
+    const stored = preferenceStore.load();
+    if (Object.keys(stored).length) {
+      setRuntimeState((current) => ({ ...current, preferences: normalizePreferences({ ...current.preferences, ...stored }) }));
+    }
+  }, [preferenceStore]);
 
   const callbacks = useMemo(() => {
     const nextCallbacks = {
@@ -142,6 +148,26 @@ export function SubjectiveRoot({ state: explicitState, className, ...props }) {
 export function SubjectiveDataBoundary({ data, state, ...props }) {
   const resolvedData = use(data);
   return createElement(SubjectiveRoot, { ...props, state: { ...state, data: resolvedData } });
+}
+
+export function SubjectiveHydratedRoot({ state: explicitState, className, ...props }) {
+  const context = useContext(SubjectiveReactContext);
+  const state = explicitState || context?.state;
+  invariant(state?.manifest && state?.variant, "SubjectiveHydratedRoot requires state or a SubjectiveProvider parent.");
+  const targetRef = useRef(null);
+  const markup = useMemo(() => renderSubjectiveMarkup(state), [state]);
+  useClientLayoutEffect(() => {
+    if (!targetRef.current) return undefined;
+    const controller = hydrateSubjective(targetRef.current, state, { fallback: true });
+    return () => controller.destroy();
+  }, [state]);
+  return createElement("div", {
+    ...props,
+    className,
+    ref: targetRef,
+    "data-subjective-react": "hydrated-root",
+    dangerouslySetInnerHTML: { __html: markup }
+  });
 }
 
 export function useSubjectiveAction(explicitState) {

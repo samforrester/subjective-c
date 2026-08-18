@@ -45,7 +45,7 @@ export async function doctorProject(projectDirectory) {
   }
   const staleStages = (await readdir(project).catch(() => [])).filter((name) => name.startsWith(".subjective-stage-"));
   checks.push({ name: "No stale build staging", ok: staleStages.length === 0, detail: staleStages.length ? staleStages.join(", ") : "clean" });
-  checks.push({ name: "Framework version", ok: SUBJECTIVE_C_VERSION === "0.3.0-alpha.1", detail: SUBJECTIVE_C_VERSION });
+  checks.push({ name: "Framework version", ok: SUBJECTIVE_C_VERSION === "0.3.0-alpha.2", detail: SUBJECTIVE_C_VERSION });
   try {
     checks.push({ name: "@subjective-c/core", ok: true, detail: resolvePackageFile("@subjective-c/core") });
   } catch (error) {

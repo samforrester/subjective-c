@@ -71,3 +71,7 @@ export function mountSubjective(target: Element, state: RuntimeState): {
   update(nextState: RuntimeState): unknown;
   destroy(): void;
 };
+export function hydrateSubjective(target: Element, state: RuntimeState, options?: { fallback?: boolean }): {
+  update(nextState: RuntimeState): unknown;
+  destroy(): void;
+};

@@ -20,6 +20,7 @@
 - Destructive actions require normalized confirmation copy and an approval step before emission.
 - Application theme tokens reject CSS rule delimiters and unsafe identifiers.
 - Preference storage accepts only known density, motion, contrast, and safe palette values.
+- Runtime hydration binds existing markup only when manifest and variant identity markers match; strict consumers can reject mismatches instead of falling back.
 - Build output defaults inside the project and rejects project root, filesystem root, and the user home directory.
 - External output requires `allowExternalOutDir: true` or `--allow-external-out-dir`.
 - Builds stage all files before atomically replacing the last successful output.

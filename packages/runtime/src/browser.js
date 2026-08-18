@@ -523,7 +523,7 @@ export function renderSubjectiveMarkup(state) {
   ].filter(Boolean).join(" ");
 
   return `
-    <div class="${shellClasses}" style="${style}" data-sc-variant="${escapeHtml(variant.id)}">
+    <div class="${shellClasses}" style="${style}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}">
       <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i></div>
       ${variant.navigation === "side" ? renderSidebar(manifest, variant) : ""}
       <div class="sc-app-frame">
@@ -585,8 +585,12 @@ function updateSearch(target, value) {
   if (empty) empty.hidden = visible > 0;
 }
 
+function assertTarget(target, name) {
+  if (!(target instanceof Element)) throw new Error(`${name} requires a DOM Element target.`);
+}
+
 export function mountSubjective(target, state) {
-  if (!(target instanceof Element)) throw new Error("mountSubjective requires a DOM Element target.");
+  assertTarget(target, "mountSubjective");
   const previousFocus = target.contains(document.activeElement)
     ? {
       action: document.activeElement.getAttribute?.("data-sc-action"),
@@ -605,6 +609,27 @@ export function mountSubjective(target, state) {
         : previousFocus.search ? "[data-sc-search]" : null;
     if (selector) target.querySelector(selector)?.focus({ preventScroll: true });
   }
+  return bindSubjective(target, state, { clearOnDestroy: true });
+}
+
+export function hydrateSubjective(target, state, options = {}) {
+  assertTarget(target, "hydrateSubjective");
+  if (!state?.manifest || !state?.variant) throw new Error("hydrateSubjective requires a manifest and variant.");
+  if (state.plan && (state.plan.manifestHash !== state.manifest.source.hash || state.plan.variantId !== state.variant.id)) {
+    throw new Error("The Subjective C plan does not match the manifest and variant.");
+  }
+  const shell = target.firstElementChild;
+  const matches = shell?.classList.contains("sc-shell")
+    && shell.getAttribute("data-sc-variant") === state.variant.id
+    && shell.getAttribute("data-sc-manifest") === state.manifest.source.hash;
+  if (!matches) {
+    if (options.fallback === false) throw new Error("The server-rendered Subjective C markup does not match the current variant.");
+    return mountSubjective(target, state);
+  }
+  return bindSubjective(target, state, { clearOnDestroy: false });
+}
+
+function bindSubjective(target, state, options = {}) {
 
   const callbacks = state.callbacks || {};
   const items = Array.isArray(state.data?.items) ? state.data.items : [];
@@ -756,7 +781,7 @@ export function mountSubjective(target, state) {
   };
 
   const createForm = target.querySelector("[data-sc-create-form]");
-  createForm?.addEventListener("submit", (event) => {
+  const createSubmitHandler = (event) => {
     const submitter = event.submitter;
     if (!submitter?.matches("[data-sc-submit-create]")) return;
     event.preventDefault();
@@ -772,7 +797,8 @@ export function mountSubjective(target, state) {
     };
     callbacks.onDataChange?.({ ...state.data, items: [nextItem, ...items] });
     createForm.closest("dialog")?.close();
-  });
+  };
+  createForm?.addEventListener("submit", createSubmitHandler);
 
   if (target.__subjectiveKeyHandler) window.removeEventListener("keydown", target.__subjectiveKeyHandler);
   target.__subjectiveKeyHandler = (event) => {
@@ -798,11 +824,13 @@ export function mountSubjective(target, state) {
     },
     destroy() {
       if (target.__subjectiveKeyHandler) window.removeEventListener("keydown", target.__subjectiveKeyHandler);
+      target.__subjectiveKeyHandler = null;
+      createForm?.removeEventListener("submit", createSubmitHandler);
       target.onclick = null;
       target.oninput = null;
       target.onchange = null;
       target.onkeydown = null;
-      target.innerHTML = "";
+      if (options.clearOnDestroy !== false) target.innerHTML = "";
     }
   };
 }

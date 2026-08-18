@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0-alpha.2 — 2026-08-17
+
+- Added `hydrateSubjective` to attach trusted runtime behavior to matching server-rendered markup without replacing its DOM.
+- Added `SubjectiveHydratedRoot` for an identical React server/client tree with interaction binding after hydration.
+- Added manifest and variant identity markers plus strict mismatch rejection and safe client-render fallback.
+- Deferred browser-only preference restoration until client binding so the initial server and hydration trees remain deterministic.
+- Separated runtime event binding from markup generation while preserving focus, actions, preferences, forms, and cleanup behavior.
+- Added runtime and React hydration tests that assert server DOM node identity survives hydration.
+
 ## 0.3.0-alpha.1 — 2026-08-17
 
 - Added `@subjective-c/react` with a managed provider, client runtime root, Suspense data boundary, and static server renderer.
