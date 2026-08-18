@@ -24,6 +24,7 @@ const context = await browser.newContext({
 });
 const page = await context.newPage();
 const video = page.video();
+const webm = resolve(output, "subjective-c-x-demo.webm");
 const pause = (milliseconds) => page.waitForTimeout(milliseconds);
 const cursorBeats = [[720, 360], [1320, 510], [1040, 730], [480, 590], [1440, 330]];
 let cursorBeat = 0;
@@ -66,13 +67,11 @@ try {
   await pause(1900);
 } finally {
   await page.close();
+  await video.saveAs(webm);
   await context.close();
   await browser.close();
   app.close();
 }
-
-const webm = resolve(output, "subjective-c-x-demo.webm");
-await video.saveAs(webm);
 
 const ffmpeg = spawnSync("ffmpeg", ["-version"], { stdio: "ignore" });
 if (ffmpeg.status === 0) {
