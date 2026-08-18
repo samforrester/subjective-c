@@ -78,6 +78,9 @@ test("cinema mode renders a deterministic launch-film surface", () => {
   assert.match(html, /What if intent/);
   assert.match(html, /Intent is source code/);
   assert.match(html, /sc-cinema-watermark/);
+  assert.match(html, /Enter reality/);
+  assert.match(html, /Autopilot/);
+  assert.match(html, /Open the lab/);
 });
 
 test("provider-controlled glyphs are escaped before HTML interpolation", () => {

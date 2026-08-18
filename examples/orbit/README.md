@@ -40,4 +40,6 @@ npm run demo:record
 
 This produces a 1920×1080 source recording, an X-ready H.264 MP4 when `ffmpeg` is installed, and a PNG thumbnail in `artifacts/`. The GitHub Actions workflow **Render X demo video** produces the same downloadable assets without local setup.
 
-Open the recordable surface directly with `?cinema=1`. Its stable automation API is available at `window.SubjectiveC.setInterpretation(id)` and `window.SubjectiveC.setCinemaPhase(phase)`.
+Open the cinematic surface directly with `?cinema=1`. Choose **Enter reality**, then use the arrow rail, `[` and `]`, or **Autopilot** to travel through the experience. **Open the lab** returns to the complete inspector.
+
+Add `&autoplay=1` to enter automatically and begin the director’s sequence. Its stable automation API is available at `window.SubjectiveC.setInterpretation(id)`, `window.SubjectiveC.setCinemaPhase(phase)`, and `window.SubjectiveC.toggleCinemaAutoplay()`.

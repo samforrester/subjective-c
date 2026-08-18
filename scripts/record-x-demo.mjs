@@ -45,7 +45,7 @@ async function enterReality(id, hold = 1200) {
 }
 
 try {
-  await page.goto(`${app.url}?cinema=1&seed=x-launch&interpretation=gravity-well`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${app.url}?cinema=1&recording=1&seed=x-launch&interpretation=gravity-well`, { waitUntil: "domcontentloaded" });
   await page.locator(".sc-shell").waitFor();
   authoredStartAt = Date.now();
   await pause(1450);
