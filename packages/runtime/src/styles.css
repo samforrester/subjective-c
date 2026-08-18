@@ -184,9 +184,10 @@ select:focus-visible,
   --sc-panel-solid: #f4f6f5;
   --sc-text: #16242b;
   --sc-muted: #53666e;
-  --sc-faint: #708087;
+  --sc-faint: #4f6269;
   --sc-line: rgba(25, 49, 59, .14);
-  --sc-accent: #e64e2c;
+  --sc-accent: #a93622;
+  --sc-on-accent: #ffffff;
   --sc-accent-soft: #f4d8cf;
   --sc-shadow: 0 30px 90px rgba(56, 75, 81, .13);
   --sc-radius: 28px !important;
