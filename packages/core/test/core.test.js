@@ -7,6 +7,7 @@ import {
   defineComponentPackage,
   defineComponentRegistry,
   diagnoseSubjective,
+  SUBJECTIVE_INTERPRETATIONS,
   createSubjectivePlan,
   createVariant,
   createVariants,
@@ -99,6 +100,24 @@ test("createVariants returns distinct reproducible candidates", () => {
   assert.equal(variants.length, 5);
   assert.equal(new Set(variants.map(({ id }) => id)).size, 5);
   assert.ok(variantDistance(variants[0], variants[1]) >= 0);
+});
+
+test("SF interpretations can be pinned and preserve their operational identity", () => {
+  const manifest = compileSubjective(source);
+  assert.equal(SUBJECTIVE_INTERPRETATIONS.length, 9);
+  for (const interpretation of SUBJECTIVE_INTERPRETATIONS) {
+    const variant = createVariant(manifest, {
+      seed: `pinned:${interpretation.id}`,
+      novelty: 0.9,
+      interpretation: interpretation.id
+    });
+    assert.equal(variant.theme.interpretation, interpretation.id);
+    assert.equal(variant.theme.label, interpretation.label);
+    assert.equal(variant.theme.location, interpretation.location);
+    assert.ok(interpretation.layouts.includes(variant.layout));
+    assert.match(variant.explanation.join(" "), /San Francisco/);
+  }
+  assert.throws(() => createVariant(manifest, { interpretation: "not-a-place" }), /Unknown Subjective C interpretation/);
 });
 
 

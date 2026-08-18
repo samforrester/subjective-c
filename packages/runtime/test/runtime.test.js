@@ -41,6 +41,33 @@ test("renderSubjectiveMarkup includes stable anchors and data", () => {
   assert.match(html, /New Project/);
   assert.match(html, /Launch/);
   assert.match(html, /v-test/);
+  assert.match(html, /data-sc-interpretation="warm-paper"/);
+  assert.match(html, /37\.7749/);
+});
+
+test("renderSubjectiveMarkup exposes SF interpretation chrome and adaptive language", () => {
+  const html = renderSubjectiveMarkup({
+    manifest,
+    variant: {
+      ...variant,
+      composition: { ...variant.composition, sections: ["hero", "collection", "insight"] },
+      theme: {
+        ...variant.theme,
+        palette: "muni-control",
+        interpretation: "muni-control",
+        label: "Muni Control",
+        location: "Market Street",
+        symbol: "N"
+      }
+    },
+    data: { items: [{ name: "Launch", status: "Planned", owner: "Dylan", progress: 10 }] },
+    devtools: true
+  });
+  assert.match(html, /data-sc-interpretation="muni-control"/);
+  assert.match(html, /Muni Control/);
+  assert.match(html, /Market Street/);
+  assert.match(html, /Active lines/);
+  assert.match(html, /Service advisory/);
 });
 
 test("provider-controlled glyphs are escaped before HTML interpolation", () => {
