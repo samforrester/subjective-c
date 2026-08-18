@@ -161,7 +161,7 @@ select:focus-visible,
   color-scheme: dark;
   --sc-text: #f7f7f2;
   --sc-muted: #a9aaa4;
-  --sc-faint: #7d7f7a;
+  --sc-faint: #94958f;
   --sc-line: rgba(255, 255, 255, .14);
   --sc-panel: rgba(12, 13, 14, .84);
   --sc-panel-solid: #111214;
@@ -210,7 +210,7 @@ select:focus-visible,
   --sc-panel-solid: #fbf6e9;
   --sc-text: #092b39;
   --sc-muted: #526c73;
-  --sc-faint: #76898d;
+  --sc-faint: #4f666b;
   --sc-line: rgba(11, 52, 67, .15);
   --sc-accent: #087f8c;
   --sc-accent-soft: #d1e8e5;
@@ -239,9 +239,10 @@ select:focus-visible,
   --sc-panel-solid: #f9f3e8;
   --sc-text: #251c18;
   --sc-muted: #71635c;
-  --sc-faint: #8b7c74;
+  --sc-faint: #65554e;
   --sc-line: rgba(75, 43, 31, .15);
-  --sc-accent: #e34a2b;
+  --sc-accent: #a93622;
+  --sc-on-accent: #ffffff;
   --sc-accent-soft: #f6d7cb;
   --sc-positive: #24775d;
   --sc-negative: #bd2e28;
@@ -268,7 +269,7 @@ select:focus-visible,
   --sc-panel-solid: #0d0d0d;
   --sc-text: #fafafa;
   --sc-muted: #999;
-  --sc-faint: #666;
+  --sc-faint: #999;
   --sc-line: rgba(255, 255, 255, .16);
   --sc-accent: #fff;
   --sc-accent-soft: #242424;
@@ -285,7 +286,7 @@ select:focus-visible,
   --sc-panel-solid: #fff;
   --sc-text: #111;
   --sc-muted: #525252;
-  --sc-faint: #777;
+  --sc-faint: #555;
   --sc-line: rgba(0, 0, 0, .18);
   --sc-accent: #0868ac;
   --sc-accent-soft: #d9eaf4;
