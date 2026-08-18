@@ -122,6 +122,22 @@ function renderExperienceChrome(variant) {
     <div class="sc-transmission" aria-hidden="true"><div>${escapeHtml(transmission.repeat(4))}</div></div>`;
 }
 
+function renderCinemaChrome() {
+  return `
+    <div class="sc-cinema-grain" aria-hidden="true"></div>
+    <div class="sc-cinema-watermark" aria-hidden="true"><b>SUBJECTIVE C</b><span>INTENT → INTERFACE</span></div>
+    <section class="sc-cinema-slate sc-cinema-intro" aria-label="Subjective C demo introduction">
+      <small>An interface compiler experiment</small>
+      <h2>What if intent<br>was the source code?</h2>
+      <p>One product. Eleven realities. Stable meaning.</p>
+    </section>
+    <section class="sc-cinema-slate sc-cinema-outro" aria-label="Subjective C demo conclusion">
+      <small>Subjective C</small>
+      <h2>Intent is source code.</h2>
+      <p>github.com/samforrester/subjective-c</p>
+    </section>`;
+}
+
 function renderLogo(manifest, compact = false) {
   const initials = manifest.name
     .split(/\s+/)
@@ -608,7 +624,7 @@ function classToken(value, fallback) {
 }
 
 export function renderSubjectiveMarkup(state) {
-  const { manifest, variant, plan, data = {}, source = manifest?.source?.text || "", devtools = true, locked = false } = state;
+  const { manifest, variant, plan, data = {}, source = manifest?.source?.text || "", devtools = true, locked = false, cinemaMode = false } = state;
   if (!manifest || !variant) throw new Error("renderSubjectiveMarkup requires a manifest and variant.");
   if (plan && (plan.manifestHash !== manifest.source.hash || plan.variantId !== variant.id)) {
     throw new Error("The Subjective C plan does not match the manifest and variant.");
@@ -623,11 +639,13 @@ export function renderSubjectiveMarkup(state) {
     `sc-density-${classToken(preferences.density || variant.density, "balanced")}`,
     `sc-palette-${classToken(preferences.contrast === "high" ? "high-contrast" : preferences.palette || variant.theme.palette, "neutral")}`,
     `sc-motion-${classToken(preferences.motion || variant.theme.motion, "subtle")}`,
+    cinemaMode ? "sc-cinema-mode" : "",
     devtools ? "sc-with-devtools" : ""
   ].filter(Boolean).join(" ");
 
   return `
     <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}" data-sc-interpretation="${escapeHtml(interpretation.id)}">
+      ${cinemaMode ? renderCinemaChrome() : ""}
       ${renderExperienceChrome(variant)}
       <div class="sc-city-chrome" aria-hidden="true"><span>37.7749° N / 122.4194° W</span><strong>${escapeHtml(interpretation.symbol)}</strong><span>${escapeHtml(interpretation.location)} / LIVE</span></div>
       <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i><b></b></div>

@@ -6,6 +6,7 @@
 - Added interpretation-aware layouts, palettes, language, environmental chrome, motion, and responsive behavior.
 - Added a live SF lens selector to the runtime inspector and `?interpretation=<id>` demo URLs.
 - Added cinematic View Transitions, a spatial cursor field, kinetic transmission rail, scene navigator, scroll telemetry, reality-confidence meter, and keyboard lens travel with `[` and `]`.
+- Added a deterministic cinema mode, X launch-film choreography, MP4/WebM recorder, thumbnail capture, and manually dispatched GitHub video-render workflow.
 - Exported `SUBJECTIVE_INTERPRETATIONS` and added typed `interpretation` generation options.
 
 ## 0.3.0-alpha.3 — 2026-08-17

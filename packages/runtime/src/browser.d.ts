@@ -58,6 +58,7 @@ export type RuntimeState = {
   devtools?: boolean;
   locked?: boolean;
   inspectorOpen?: boolean;
+  cinemaMode?: boolean;
   callbacks?: RuntimeCallbacks;
   preferences?: RuntimePreferences;
   themeTokens?: Record<string, string | number>;

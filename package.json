@@ -19,6 +19,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "browser:install": "node scripts/install-browser.mjs",
     "test:browser": "node tests/browser-smoke.mjs",
+    "demo:record": "node scripts/record-x-demo.mjs",
     "benchmark": "node scripts/benchmark.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:contracts": "node scripts/verify-contracts.mjs",

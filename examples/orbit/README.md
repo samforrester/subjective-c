@@ -28,3 +28,16 @@ http://127.0.0.1:4173/?interpretation=dream-fold
 ```
 
 Use `[` and `]` to travel backward and forward through the city without opening the inspector.
+
+## Record the X demo
+
+Install the browser once, then render the launch cut:
+
+```bash
+npm run browser:install
+npm run demo:record
+```
+
+This produces a 1920×1080 source recording, an X-ready H.264 MP4 when `ffmpeg` is installed, and a PNG thumbnail in `artifacts/`. The GitHub Actions workflow **Render X demo video** produces the same downloadable assets without local setup.
+
+Open the recordable surface directly with `?cinema=1`. Its stable automation API is available at `window.SubjectiveC.setInterpretation(id)` and `window.SubjectiveC.setCinemaPhase(phase)`.
