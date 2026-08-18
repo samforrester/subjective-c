@@ -25,8 +25,12 @@ Implemented in the alpha:
 - Atomic builds and guarded output paths
 - Provider markup hardening
 - Browser, accessibility, semantic, benchmark, doctor, and release gates
+- Application-owned component packages and theme-token contracts
+- Fail-closed runtime authorization and destructive-action confirmation
+- Persisted density, motion, and contrast preference UI
+- Structured manifest, registry, permission, and plan diagnostics
 
-Still planned: application-owned component packages, host-enforced permissions, theme tokens, persisted preference UI, richer domain extraction, and manifest diagnostics.
+Still planned: richer domain extraction and application-specific diagnostic extensions.
 
 ## 0.3 — Framework adapters
 

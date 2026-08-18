@@ -46,10 +46,14 @@ That source compiles into a stable intent manifest. A policy engine then chooses
 - Novice, returning, expert, mobile, contrast, and motion contexts
 - Stable anchors for brand, actions, labels, semantics, and shortcuts
 - Trusted component and permission-aware action contracts
+- Application-owned component packages and validated theme-token contracts
 - A serializable plan that proves required capabilities remain reachable
 - Stable context assignments by default, with explicit reinterpretation
 - A browser runtime with generated navigation, metrics, collections, activity, search, dialogs, and semantic action events
 - An in-browser inspector that can edit and recompile the source
+- Persisted density, motion, and contrast preferences that survive reinterpretation
+- Runtime permission authorization and destructive-action confirmation gates
+- Structured manifest, registry, permission, and plan diagnostics
 - A CLI with `init`, `dev`, `build`, `inspect`, and `doctor`
 - Atomic static builds with guarded output paths and no framework runtime dependency
 - A provider API for replacing the local compiler with an external model
@@ -206,8 +210,26 @@ Generated composition must not own business logic. The browser runtime emits a b
 
 ```js
 window.addEventListener("subjective:action", (event) => {
-  const { id, kind, variant, permission, destructive } = event.detail;
+  const { id, kind, variant, permission, destructive, confirmation } = event.detail;
   // Route the semantic action into your domain layer.
+});
+```
+
+Permissioned actions do not emit this event unless the host's `authorizeAction` callback returns `true`. Destructive actions must also pass either the host's `confirmAction` callback or the runtime's accessible confirmation dialog. Authorization must still be repeated in the service that performs the mutation.
+
+Runtime preferences and application theme tokens are explicit inputs:
+
+```js
+mountSubjective(target, {
+  manifest,
+  variant,
+  plan,
+  preferences: { density: "compact", motion: "reduced" },
+  themeTokens: { accent: "#4422aa", "header-height": "72px" },
+  callbacks: {
+    authorizeAction: ({ permission }) => session.permissions.includes(permission),
+    onPreferenceChange: (preferences) => preferenceStore.save(preferences)
+  }
 });
 ```
 
@@ -236,7 +258,7 @@ See [`docs/COMPONENT_CONTRACTS.md`](docs/COMPONENT_CONTRACTS.md) for the trusted
 
 ## Status
 
-This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action contracts, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs framework adapters, application-owned component packages, persistence, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
+This is an alpha and a serious prototype, not a production recommendation. The current compiler understands structured English and common product vocabulary; it does not yet reason deeply about arbitrary domains. The alpha now enforces plan reachability, trusted component/action packages, fail-closed client authorization, destructive confirmation, safe preferences and tokens, output-path safety, provider validation, deterministic assignments, and automated accessibility checks. Production use still needs framework adapters, service-side policy integration, telemetry and privacy design, independent security review, and user research on trust and muscle memory.
 
 Read [`docs/ROADMAP.md`](docs/ROADMAP.md) for the path forward and [`docs/RFC-0001-INTENT-FIRST-UI.md`](docs/RFC-0001-INTENT-FIRST-UI.md) for the original technical proposal.
 

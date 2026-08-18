@@ -1,4 +1,11 @@
 const STATUS_ORDER = ["Blocked", "In progress", "Review", "Planned", "Done"];
+const PREFERENCE_VALUES = Object.freeze({
+  density: new Set(["comfortable", "balanced", "compact"]),
+  motion: new Set(["subtle", "expressive", "reduced"]),
+  contrast: new Set(["standard", "high"])
+});
+const SAFE_ID = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+const SAFE_TOKEN_VALUE = /^[^;{}<>]*$/;
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -340,6 +347,7 @@ function renderSection(name, manifest, data, variant) {
 }
 
 function renderInspector(manifest, variant, source, state) {
+  const preferences = normalizePreferences(state.preferences);
   const options = ["novice", "returning", "expert"]
     .map((value) => `<option value="${value}" ${variant.context.experience === value ? "selected" : ""}>${value[0].toUpperCase()}${value.slice(1)}</option>`)
     .join("");
@@ -369,6 +377,16 @@ function renderInspector(manifest, variant, source, state) {
           <label><span>User model</span><select data-sc-experience>${options}</select></label>
           <label><span>Novelty <output>${Math.round(variant.novelty * 100)}%</output></span><input type="range" min="0" max="1" step="0.01" value="${variant.novelty}" data-sc-novelty></label>
         </section>
+
+        <details>
+          <summary>Interface preferences</summary>
+          <p class="sc-inspector-help">Preferences remain stable while the interface is reinterpreted.</p>
+          <section class="sc-control-group">
+            <label><span>Density</span><select data-sc-preference="density"><option value="">Adaptive</option>${["comfortable", "balanced", "compact"].map((value) => `<option value="${value}" ${preferences.density === value ? "selected" : ""}>${value[0].toUpperCase()}${value.slice(1)}</option>`).join("")}</select></label>
+            <label><span>Motion</span><select data-sc-preference="motion"><option value="">Adaptive</option>${["subtle", "expressive", "reduced"].map((value) => `<option value="${value}" ${preferences.motion === value ? "selected" : ""}>${value[0].toUpperCase()}${value.slice(1)}</option>`).join("")}</select></label>
+            <label><span>Contrast</span><select data-sc-preference="contrast"><option value="">Adaptive</option>${["standard", "high"].map((value) => `<option value="${value}" ${preferences.contrast === value ? "selected" : ""}>${value[0].toUpperCase()}${value.slice(1)}</option>`).join("")}</select></label>
+          </section>
+        </details>
 
         <details open>
           <summary>Why this UI?</summary>
@@ -427,20 +445,67 @@ function renderItemDialog(manifest, data) {
     </dialog>`;
 }
 
+function renderActionConfirmationDialog() {
+  return `
+    <dialog class="sc-dialog sc-confirm-dialog" data-sc-confirm-dialog>
+      <form method="dialog">
+        <header><div><span class="sc-section-kicker">Confirmation required</span><h2 data-sc-confirm-title>Confirm action</h2></div><button value="cancel" aria-label="Close">×</button></header>
+        <p data-sc-confirm-description>This action may be difficult to undo.</p>
+        <footer><button class="sc-button sc-button-quiet" value="cancel">Cancel</button><button class="sc-button sc-button-danger" value="confirm" data-sc-confirm-submit>Confirm</button></footer>
+      </form>
+    </dialog>`;
+}
+
+export function normalizePreferences(input = {}) {
+  const preferences = {};
+  for (const key of Object.keys(PREFERENCE_VALUES)) {
+    if (PREFERENCE_VALUES[key].has(input[key])) preferences[key] = input[key];
+  }
+  if (typeof input.palette === "string" && SAFE_ID.test(input.palette)) preferences.palette = input.palette;
+  return Object.freeze(preferences);
+}
+
+export function createPreferenceStore(options = {}) {
+  const key = options.key || "subjective-c:preferences";
+  const storage = options.storage || globalThis.localStorage;
+  return Object.freeze({
+    load() {
+      try { return normalizePreferences(JSON.parse(storage?.getItem(key) || "{}")); } catch { return normalizePreferences(); }
+    },
+    save(preferences) {
+      const normalized = normalizePreferences(preferences);
+      storage?.setItem(key, JSON.stringify(normalized));
+      return normalized;
+    },
+    clear() { storage?.removeItem(key); }
+  });
+}
+
+function themeStyle(variant, tokens = {}) {
+  const declarations = [`--sc-hue:${Number(variant.theme.hue)}`, `--sc-radius:${Number(variant.theme.radius)}px`];
+  for (const [id, value] of Object.entries(tokens || {})) {
+    if (SAFE_ID.test(id) && (typeof value === "string" || typeof value === "number") && SAFE_TOKEN_VALUE.test(String(value))) {
+      declarations.push(`--sc-${id}:${String(value)}`);
+    }
+  }
+  return declarations.join(";");
+}
+
 export function renderSubjectiveMarkup(state) {
   const { manifest, variant, plan, data = {}, source = manifest?.source?.text || "", devtools = true, locked = false } = state;
   if (!manifest || !variant) throw new Error("renderSubjectiveMarkup requires a manifest and variant.");
   if (plan && (plan.manifestHash !== manifest.source.hash || plan.variantId !== variant.id)) {
     throw new Error("The Subjective C plan does not match the manifest and variant.");
   }
-  const style = `--sc-hue:${Number(variant.theme.hue)};--sc-radius:${Number(variant.theme.radius)}px`;
+  const preferences = normalizePreferences(state.preferences);
+  const style = themeStyle(variant, state.themeTokens);
   const sections = (plan?.sectionOrder || variant.composition.sections).map((name) => renderSection(name, manifest, data, variant)).join("");
   const shellClasses = [
     "sc-shell",
     `sc-layout-${variant.layout}`,
-    `sc-density-${variant.density}`,
-    `sc-palette-${variant.theme.palette}`,
-    `sc-motion-${variant.theme.motion}`,
+    `sc-density-${preferences.density || variant.density}`,
+    `sc-palette-${preferences.contrast === "high" ? "high-contrast" : preferences.palette || variant.theme.palette}`,
+    `sc-motion-${preferences.motion || variant.theme.motion}`,
     devtools ? "sc-with-devtools" : ""
   ].filter(Boolean).join(" ");
 
@@ -453,9 +518,10 @@ export function renderSubjectiveMarkup(state) {
         <main class="sc-main">${sections}</main>
         <footer class="sc-app-footer"><span>${escapeHtml(manifest.name)}</span><span>Intent compiled by Subjective C · ${escapeHtml(variant.id)}</span></footer>
       </div>
-      ${devtools ? renderInspector(manifest, variant, source, { locked, inspectorOpen: state.inspectorOpen }) : ""}
+      ${devtools ? renderInspector(manifest, variant, source, { locked, inspectorOpen: state.inspectorOpen, preferences }) : ""}
       ${renderCreateDialog(manifest)}
       ${renderItemDialog(manifest, data)}
+      ${renderActionConfirmationDialog()}
       <div class="sc-toast" role="status" aria-live="polite" data-sc-toast></div>
     </div>`;
 }
@@ -478,6 +544,19 @@ function openDialog(dialog) {
   if (!dialog) return;
   if (typeof dialog.showModal === "function") dialog.showModal();
   else dialog.setAttribute("open", "");
+}
+
+function confirmActionInDialog(target, contract) {
+  const dialog = target.querySelector("[data-sc-confirm-dialog]");
+  if (!dialog) return Promise.resolve(false);
+  const confirmation = contract.confirmation || {};
+  dialog.querySelector("[data-sc-confirm-title]").textContent = confirmation.title || `Confirm ${contract.label}`;
+  dialog.querySelector("[data-sc-confirm-description]").textContent = confirmation.description || "This action may be difficult to undo.";
+  dialog.querySelector("[data-sc-confirm-submit]").textContent = confirmation.confirmLabel || contract.label || "Confirm";
+  openDialog(dialog);
+  return new Promise((resolve) => {
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "confirm"), { once: true });
+  });
 }
 
 function updateSearch(target, value) {
@@ -518,7 +597,7 @@ export function mountSubjective(target, state) {
   const items = Array.isArray(state.data?.items) ? state.data.items : [];
   const allowedActions = new Map((state.plan?.actions || state.manifest.capabilities || []).map((action) => [action.id, action]));
 
-  target.onclick = (event) => {
+  target.onclick = async (event) => {
     const element = event.target.closest("button, a, [data-sc-item]");
     if (!element || !target.contains(element)) return;
 
@@ -589,8 +668,38 @@ export function mountSubjective(target, state) {
         kind: action.getAttribute("data-sc-action-kind") || "custom",
         variant: state.variant.id,
         permission: contract?.permission ?? null,
-        destructive: contract?.destructive === true
+        destructive: contract?.destructive === true,
+        confirmation: contract?.confirmation ?? null
       };
+      if (detail.permission) {
+        let authorized = false;
+        try {
+          authorized = typeof callbacks.authorizeAction === "function" && await callbacks.authorizeAction(detail) === true;
+        } catch (error) {
+          callbacks.onActionError?.({ detail, error });
+        }
+        if (!authorized) {
+          const denial = { ...detail, reason: "permission-denied" };
+          target.dispatchEvent(new CustomEvent("subjective:action-denied", { bubbles: true, detail: denial }));
+          callbacks.onActionDenied?.(denial);
+          showToast(target, "You do not have permission to perform this action.");
+          return;
+        }
+      }
+      if (detail.destructive) {
+        let confirmed = false;
+        try {
+          confirmed = typeof callbacks.confirmAction === "function"
+            ? await callbacks.confirmAction(detail) === true
+            : await confirmActionInDialog(target, contract);
+        } catch (error) {
+          callbacks.onActionError?.({ detail, error });
+        }
+        if (!confirmed) {
+          callbacks.onActionDenied?.({ ...detail, reason: "confirmation-declined" });
+          return;
+        }
+      }
       emitAction(target, detail);
       callbacks.onAction?.(detail);
       if (detail.kind === "create") {
@@ -616,6 +725,13 @@ export function mountSubjective(target, state) {
   target.onchange = (event) => {
     if (event.target.matches("[data-sc-experience]")) callbacks.onContextChange?.({ experience: event.target.value });
     if (event.target.matches("[data-sc-novelty]")) callbacks.onNoveltyChange?.(Number(event.target.value));
+    if (event.target.matches("[data-sc-preference]")) {
+      const key = event.target.getAttribute("data-sc-preference");
+      const next = { ...normalizePreferences(state.preferences) };
+      if (event.target.value) next[key] = event.target.value;
+      else delete next[key];
+      callbacks.onPreferenceChange?.(normalizePreferences(next));
+    }
   };
 
   target.onkeydown = (event) => {

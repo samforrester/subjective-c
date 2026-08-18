@@ -1,4 +1,4 @@
-import type { SubjectiveManifest, SubjectivePlan, SubjectiveVariant } from "@subjective-c/core";
+import type { ActionContract, SubjectiveManifest, SubjectivePlan, SubjectiveVariant } from "@subjective-c/core";
 
 export type SubjectiveData = {
   metrics?: Array<{ label: string; value: string; delta?: string }>;
@@ -24,7 +24,28 @@ export type RuntimeCallbacks = {
   onContextChange?(patch: Record<string, unknown>): void;
   onNoveltyChange?(value: number): void;
   onDataChange?(data: SubjectiveData): void;
-  onAction?(detail: { id: string; kind: string; variant: string; permission: string | null; destructive: boolean }): void;
+  onPreferenceChange?(preferences: Readonly<RuntimePreferences>): void;
+  authorizeAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
+  confirmAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
+  onAction?(detail: RuntimeActionDetail): void;
+  onActionDenied?(detail: RuntimeActionDetail & { reason: "permission-denied" | "confirmation-declined" }): void;
+  onActionError?(failure: { detail: RuntimeActionDetail; error: unknown }): void;
+};
+
+export type RuntimeActionDetail = {
+  id: string;
+  kind: string;
+  variant: string;
+  permission: string | null;
+  destructive: boolean;
+  confirmation: ActionContract["confirmation"];
+};
+
+export type RuntimePreferences = {
+  density?: "comfortable" | "balanced" | "compact";
+  motion?: "subtle" | "expressive" | "reduced";
+  contrast?: "standard" | "high";
+  palette?: string;
 };
 
 export type RuntimeState = {
@@ -37,9 +58,13 @@ export type RuntimeState = {
   locked?: boolean;
   inspectorOpen?: boolean;
   callbacks?: RuntimeCallbacks;
+  preferences?: RuntimePreferences;
+  themeTokens?: Record<string, string | number>;
 };
 
 export function escapeHtml(value: unknown): string;
+export function normalizePreferences(input?: RuntimePreferences): Readonly<RuntimePreferences>;
+export function createPreferenceStore(options?: { key?: string; storage?: Pick<Storage, "getItem" | "setItem" | "removeItem"> }): { load(): Readonly<RuntimePreferences>; save(preferences: RuntimePreferences): Readonly<RuntimePreferences>; clear(): void };
 export function renderSubjectiveMarkup(state: RuntimeState): string;
 export function mountSubjective(target: Element, state: RuntimeState): {
   update(nextState: RuntimeState): unknown;

@@ -21,6 +21,54 @@ try {
   await page.getByRole("button", { name: /new project/i }).first().click();
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  const enforcement = await page.evaluate(async () => {
+    const { mountSubjective } = await import("./_subjective/runtime/browser.js");
+    const host = document.createElement("div");
+    document.body.append(host);
+    const base = window.SubjectiveC;
+    const actionId = base.manifest.capabilities.find(({ kind }) => kind === "create").id;
+    const securedPlan = {
+      ...base.plan,
+      actions: base.plan.actions.map((action) => action.id === actionId ? {
+        ...action,
+        permission: "projects:create",
+        destructive: true,
+        confirmation: { title: "Confirm create", description: "Test confirmation", confirmLabel: "Create" }
+      } : action)
+    };
+    let executed = 0;
+    let denied = 0;
+    const wait = () => new Promise((resolve) => setTimeout(resolve, 0));
+    mountSubjective(host, {
+      ...base,
+      plan: securedPlan,
+      devtools: false,
+      callbacks: { onAction: () => executed++, onActionDenied: () => denied++ }
+    });
+    host.querySelector(`[data-sc-action="${actionId}"]`).click();
+    await wait();
+    const deniedWithoutHost = { executed, denied };
+
+    mountSubjective(host, {
+      ...base,
+      plan: securedPlan,
+      devtools: false,
+      callbacks: {
+        authorizeAction: () => true,
+        confirmAction: () => true,
+        onAction: () => executed++,
+        onActionDenied: () => denied++
+      }
+    });
+    host.querySelector(`[data-sc-action="${actionId}"]`).click();
+    await wait();
+    const authorized = { executed, denied };
+    host.remove();
+    return { deniedWithoutHost, authorized };
+  });
+  if (enforcement.deniedWithoutHost.executed !== 0 || enforcement.deniedWithoutHost.denied !== 1 || enforcement.authorized.executed !== 1) {
+    throw new Error(`Action enforcement failed: ${JSON.stringify(enforcement)}`);
+  }
   const paletteSeeds = ["audit-0", "audit-1", "audit-2", "audit-3", "audit-12", "audit-28"];
   for (const seed of paletteSeeds) {
     await page.goto(`${app.url}?seed=${seed}`);
@@ -30,7 +78,7 @@ try {
       throw new Error(`Accessibility violations for ${seed}: ${details.join(", ")}`);
     }
   }
-  console.log("✓ browser interactions, reduced motion, keyboard search, dialogs, and six-palette axe checks passed");
+  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, keyboard search, dialogs, and six-palette axe checks passed");
 } finally {
   await context.close();
   await browser.close();

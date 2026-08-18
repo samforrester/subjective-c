@@ -1,4 +1,4 @@
-export const SUBJECTIVE_C_VERSION = "0.2.0-alpha.1";
+export const SUBJECTIVE_C_VERSION = "0.2.0-alpha.2";
 export const MANIFEST_SCHEMA = "subjective-c/manifest@0.2";
 export const VARIANT_SCHEMA = "subjective-c/variant@0.2";
 export const REGISTRY_SCHEMA = "subjective-c/registry@0.1";
@@ -17,4 +17,3 @@ export const LAYOUTS = Object.freeze([
   "sidebar-workbench", "topbar-gallery", "editorial-split",
   "command-center", "focus-stack", "spatial-board"
 ]);
-

@@ -133,11 +133,13 @@ function htmlDocument(manifest) {
 `;
 }
 
-function browserEntry({ source, manifest, data, config, dev }) {
+function browserEntry({ source, manifest, data, config, registry, themeTokens, dev }) {
   const safeConfig = {
     novelty: Number(config.novelty ?? manifest.policies.novelty),
     devtools: config.devtools !== false,
     inspectorOpen: config.inspectorOpen !== false,
+    preferences: serializable(config.preferences, {}) || {},
+    themeTokens: serializable(themeTokens, {}) || {},
     context: {
       experience: config.context?.experience || "returning",
       device: config.context?.device || "auto",
@@ -150,11 +152,12 @@ function browserEntry({ source, manifest, data, config, dev }) {
   };
 
   return `import { compileSubjective, createSubjectivePlan, createVariant } from "./_subjective/core/index.js";
-import { mountSubjective } from "./_subjective/runtime/browser.js";
+import { createPreferenceStore, mountSubjective } from "./_subjective/runtime/browser.js";
 
 let source = ${JSON.stringify(source)};
 let manifest = ${JSON.stringify(manifest, null, 2)};
 let data = ${JSON.stringify(data, null, 2)};
+const registry = ${JSON.stringify(registry, null, 2)};
 const configuredContext = ${JSON.stringify(safeConfig.context, null, 2)};
 
 function detectRuntimeContext(base) {
@@ -173,6 +176,9 @@ let novelty = ${JSON.stringify(safeConfig.novelty)};
 let locked = localStorage.getItem("subjective-c:locked") === "true";
 let inspectorOpen = ${JSON.stringify(safeConfig.inspectorOpen)};
 const devtools = ${JSON.stringify(safeConfig.devtools)};
+const themeTokens = ${JSON.stringify(safeConfig.themeTokens, null, 2)};
+const preferenceStore = createPreferenceStore();
+let preferences = { ...${JSON.stringify(safeConfig.preferences, null, 2)}, ...preferenceStore.load() };
 const seedFromUrl = new URLSearchParams(location.search).get("seed");
 
 function freshSeed() {
@@ -198,10 +204,10 @@ function persistSeed() {
 
 function render() {
   const variant = createVariant(manifest, { seed, context, novelty });
-  const plan = createSubjectivePlan(manifest, variant);
+  const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
   document.documentElement.dataset.subjectiveVariant = variant.id;
   document.documentElement.dataset.subjectiveLayout = variant.layout;
-  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, reinterpret };
+  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, preferences, reinterpret };
   mountSubjective(target, {
     source,
     manifest,
@@ -211,6 +217,8 @@ function render() {
     devtools,
     locked,
     inspectorOpen,
+    preferences,
+    themeTokens,
     callbacks: {
       onRegenerate: reinterpret,
       onInspectorChange(open) {
@@ -241,6 +249,10 @@ function render() {
       },
       onDataChange(nextData) {
         data = nextData;
+        render();
+      },
+      onPreferenceChange(nextPreferences) {
+        preferences = preferenceStore.save(nextPreferences);
         render();
       },
       onToggleLock() {
@@ -338,6 +350,10 @@ export async function buildProject(projectDirectory, options = {}) {
     };
   const manifest = providerResult.manifest;
   const data = serializable(config.data, null) || defaultData(manifest);
+  const registry = serializable(config.componentPackage?.registry || config.registry, null);
+  const packageThemes = config.componentPackage?.themes || {};
+  const selectedTheme = config.theme || Object.keys(packageThemes)[0];
+  const themeTokens = config.themeTokens || (selectedTheme ? packageThemes[selectedTheme] : {});
   const outDirectory = resolveSafeOutputDirectory(project, options.outDir || config.outDir || "dist", {
     allowExternal: options.allowExternalOutDir === true || config.allowExternalOutDir === true
   });
@@ -347,14 +363,14 @@ export async function buildProject(projectDirectory, options = {}) {
     seed: manifest.source.hash,
     context: { ...config.context, device: config.context?.device === "auto" ? "desktop" : config.context?.device }
   });
-  const representativePlan = createSubjectivePlan(manifest, representativeVariant);
+  const representativePlan = createSubjectivePlan(manifest, representativeVariant, registry ? { registry } : undefined);
 
   try {
     await rm(stagingDirectory, { recursive: true, force: true });
     await mkdir(stagingDirectory, { recursive: true });
     await copyRuntime(stagingDirectory);
     await writeFile(resolve(stagingDirectory, "index.html"), htmlDocument(manifest), "utf8");
-    await writeFile(resolve(stagingDirectory, "app.js"), browserEntry({ source, manifest, data, config, dev: options.dev === true }), "utf8");
+    await writeFile(resolve(stagingDirectory, "app.js"), browserEntry({ source, manifest, data, config, registry, themeTokens, dev: options.dev === true }), "utf8");
     await writeFile(resolve(stagingDirectory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
     await writeFile(resolve(stagingDirectory, "plan.json"), `${JSON.stringify(representativePlan, null, 2)}\n`, "utf8");
     await writeFile(resolve(stagingDirectory, "app.subjective"), source, "utf8");
