@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subjective-c.dev/schemas/plan.schema.json",
+  "title": "Subjective C plan",
+  "type": "object",
+  "required": ["schema", "manifestHash", "variantId", "slots", "sectionOrder", "actions", "reachableCapabilities", "invariants"],
+  "properties": {
+    "schema": { "const": "subjective-c/plan@0.1" },
+    "manifestHash": { "type": "string", "minLength": 1 },
+    "variantId": { "type": "string", "minLength": 1 },
+    "slots": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["componentId", "variant"],
+        "properties": {
+          "componentId": { "type": "string" },
+          "variant": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "sectionOrder": { "type": "array", "items": { "type": "string" } },
+    "actions": { "type": "array", "items": { "type": "object" } },
+    "reachableCapabilities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "invariants": {
+      "type": "object",
+      "required": ["anchors", "requiredCapabilities", "accessibility"],
+      "properties": {
+        "anchors": { "type": "array", "items": { "type": "string" } },
+        "requiredCapabilities": { "type": "array", "items": { "type": "string" } },
+        "accessibility": { "type": "object" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

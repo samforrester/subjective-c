@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subjective-c.dev/schemas/manifest.schema.json",
+  "title": "Subjective C manifest",
+  "type": "object",
+  "required": [
+    "schema",
+    "name",
+    "slug",
+    "intent",
+    "domain",
+    "capabilities",
+    "navigation",
+    "policies",
+    "source"
+  ],
+  "properties": {
+    "schema": {
+      "const": "subjective-c/manifest@0.2"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slug": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent": {
+      "type": "object",
+      "required": [
+        "goal",
+        "audience",
+        "tone",
+        "must",
+        "prefer",
+        "avoid",
+        "adapt"
+      ],
+      "properties": {
+        "goal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audience": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tone": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "must": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prefer": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avoid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "adapt": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "domain": {
+      "type": "object",
+      "required": [
+        "singular",
+        "plural",
+        "icon"
+      ],
+      "properties": {
+        "singular": {
+          "type": "string"
+        },
+        "plural": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string",
+          "maxLength": 16,
+          "pattern": "^[^<>&]*$"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "priority",
+          "reason",
+          "required"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": ["create", "search", "filter", "sort", "collaborate", "analytics", "activity", "compare", "import", "export", "communicate", "schedule", "settings", "browse", "custom"]
+          },
+          "priority": {
+            "type": "number"
+          },
+          "shortcut": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "navigation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "priority"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "policies": {
+      "type": "object",
+      "required": [
+        "refresh",
+        "novelty",
+        "stability",
+        "anchors",
+        "accessibility"
+      ],
+      "properties": {
+        "refresh": {
+          "type": "string"
+        },
+        "novelty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "accessibility": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "hash",
+        "text",
+        "compiler"
+      ],
+      "properties": {
+        "hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string"
+        },
+        "compiler": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

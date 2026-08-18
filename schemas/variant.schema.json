@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subjective-c.dev/schemas/variant.schema.json",
+  "title": "Subjective C variant",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "seed",
+    "context",
+    "novelty",
+    "layout",
+    "density",
+    "navigation",
+    "composition",
+    "theme",
+    "anchors",
+    "explanation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "subjective-c/variant@0.2"
+    },
+    "id": {
+      "type": "string"
+    },
+    "seed": {
+      "type": "string"
+    },
+    "context": {
+      "type": "object"
+    },
+    "novelty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "layout": {
+      "type": "string"
+    },
+    "density": {
+      "type": "string"
+    },
+    "navigation": {
+      "enum": [
+        "side",
+        "top"
+      ]
+    },
+    "composition": {
+      "type": "object"
+    },
+    "theme": {
+      "type": "object"
+    },
+    "anchors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "explanation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}
