@@ -22,7 +22,7 @@ try {
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
   const firstLens = await page.locator(".sc-shell").getAttribute("data-sc-interpretation");
-  await page.keyboard.press("]");
+  await page.getByRole("button", { name: "Next SF lens" }).click();
   await page.waitForFunction((previous) => document.querySelector(".sc-shell")?.dataset.scInterpretation !== previous, firstLens);
   const enforcement = await page.evaluate(async () => {
     const { mountSubjective } = await import("./_subjective/runtime/browser.js");
@@ -81,7 +81,7 @@ try {
       throw new Error(`Accessibility violations for ${interpretation}: ${details.join(", ")}`);
     }
   }
-  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, keyboard navigation, dialogs, and eleven-lens axe checks passed");
+  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, scene navigation, keyboard search, dialogs, and eleven-lens axe checks passed");
 } finally {
   await context.close();
   await browser.close();
