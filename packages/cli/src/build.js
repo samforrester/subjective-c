@@ -120,11 +120,12 @@ function htmlDocument(manifest) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#11131a" />
     <meta name="description" content="${title}, compiled by Subjective C." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
     <title>${title} · Subjective C</title>
     <link rel="stylesheet" href="./_subjective/runtime/styles.css" />
   </head>
   <body>
-    <div id="app" aria-live="polite"></div>
+    <div id="app"></div>
     <noscript>Subjective C needs JavaScript to interpret this interface.</noscript>
     <script type="module" src="./app.js"></script>
   </body>

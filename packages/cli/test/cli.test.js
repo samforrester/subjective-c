@@ -24,6 +24,8 @@ test("buildProject emits a self-contained static application", async () => {
   const manifest = JSON.parse(await readFile(join(result.outDirectory, "manifest.json"), "utf8"));
   const plan = JSON.parse(await readFile(join(result.outDirectory, "plan.json"), "utf8"));
   assert.match(html, /Subjective C/);
+  assert.match(html, /Content-Security-Policy/);
+  assert.doesNotMatch(html, /id="app" aria-live/);
   assert.match(app, /mountSubjective/);
   assert.equal(manifest.name, "Test App");
   assert.equal(plan.manifestHash, manifest.source.hash);

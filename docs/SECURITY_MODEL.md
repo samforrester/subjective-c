@@ -11,6 +11,7 @@
 ## Enforced in 0.2 alpha
 
 - Provider-controlled values are escaped before HTML interpolation.
+- Static builds ship a restrictive script/object/base Content Security Policy.
 - `domain.icon` rejects markup and oversized glyphs.
 - Capability and navigation identifiers are validated and unique.
 - Required capabilities must remain reachable in every accepted plan.
@@ -24,4 +25,3 @@
 Treat `permission` and `destructive` as policy inputs, not authorization. Re-check permissions in the application or service that executes the action. Add confirmation UI for destructive operations, use a restrictive Content Security Policy, avoid secrets in generated data, and conduct an independent review before exposing sensitive workflows.
 
 Report vulnerabilities using the private process in [`../SECURITY.md`](../SECURITY.md), not a public issue.
-
