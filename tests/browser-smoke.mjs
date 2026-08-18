@@ -21,6 +21,8 @@ try {
   await page.getByRole("button", { name: /new project/i }).first().click();
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  if (await page.getByRole("dialog").isVisible()) await page.keyboard.press("Escape");
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
   const firstLens = await page.locator(".sc-shell").getAttribute("data-sc-interpretation");
   await page.getByRole("button", { name: "Next SF lens" }).click();
   await page.waitForFunction((previous) => document.querySelector(".sc-shell")?.dataset.scInterpretation !== previous, firstLens);
