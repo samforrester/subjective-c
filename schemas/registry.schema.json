@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subjective-c.dev/schemas/registry.schema.json",
+  "title": "Subjective C component registry",
+  "type": "object",
+  "required": ["schema", "components", "actions"],
+  "properties": {
+    "schema": { "const": "subjective-c/registry@0.1" },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "slot", "variant", "capabilities"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "slot": { "type": "string" },
+          "variant": { "type": "string" },
+          "capabilities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "kind", "permission", "destructive"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "kind": { "type": "string" },
+          "permission": { "type": ["string", "null"] },
+          "destructive": { "type": "boolean" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

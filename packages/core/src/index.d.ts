@@ -1,0 +1,132 @@
+export type SubjectiveContext = {
+  experience?: "novice" | "returning" | "expert";
+  device?: "mobile" | "tablet" | "desktop";
+  attention?: "distracted" | "focused";
+  input?: "touch" | "pointer" | "keyboard";
+  motion?: "full" | "reduced";
+  contrast?: "standard" | "high";
+  locale?: string;
+};
+
+export type SubjectiveManifest = {
+  schema: "subjective-c/manifest@0.2";
+  name: string;
+  slug: string;
+  intent: {
+    goal: string;
+    audience: string[];
+    tone: string[];
+    must: string[];
+    prefer: string[];
+    avoid: string[];
+    adapt: string[];
+  };
+  domain: { singular: string; plural: string; icon: string };
+  capabilities: Array<{
+    id: string;
+    label: string;
+    kind: string;
+    priority: number;
+    shortcut?: string;
+    reason: string;
+    required: boolean;
+  }>;
+  navigation: Array<{ id: string; label: string; priority: number }>;
+  policies: {
+    refresh: string;
+    novelty: number;
+    stability: number;
+    anchors: string[];
+    accessibility: Record<string, unknown>;
+  };
+  source: { hash: string; text: string; compiler: string };
+};
+
+export type SubjectiveVariant = {
+  schema: "subjective-c/variant@0.2";
+  id: string;
+  seed: string;
+  context: Required<SubjectiveContext>;
+  novelty: number;
+  layout: string;
+  density: string;
+  navigation: "side" | "top";
+  composition: {
+    hero: string;
+    collection: string;
+    metrics: string;
+    activity: string;
+    sections: string[];
+    copyMode: string;
+  };
+  theme: {
+    palette: string;
+    hue: number;
+    radius: number;
+    motion: string;
+    surface: string;
+  };
+  anchors: string[];
+  explanation: string[];
+};
+
+export type ActionContract = {
+  id: string;
+  label: string;
+  kind?: string;
+  permission?: string | null;
+  destructive?: boolean;
+  execute?: (...args: unknown[]) => unknown;
+};
+
+export type ComponentContract = {
+  id: string;
+  slot: string;
+  variant?: string;
+  capabilities?: string[];
+  render?: (...args: unknown[]) => unknown;
+};
+
+export type ComponentRegistry = {
+  schema: "subjective-c/registry@0.1";
+  components: ReadonlyArray<Readonly<ComponentContract>>;
+  actions: ReadonlyArray<Readonly<ActionContract>>;
+};
+
+export type SubjectivePlan = {
+  schema: "subjective-c/plan@0.1";
+  manifestHash: string;
+  variantId: string;
+  slots: Record<string, { componentId: string; variant: string }>;
+  sectionOrder: string[];
+  actions: Array<Omit<ActionContract, "execute">>;
+  reachableCapabilities: string[];
+  invariants: {
+    anchors: string[];
+    requiredCapabilities: string[];
+    accessibility: Record<string, unknown>;
+  };
+};
+
+export function compileSubjective(source: string, options?: Record<string, unknown>): SubjectiveManifest;
+export function parseSubjectiveSource(source: string): Record<string, unknown>;
+export function validateManifest(manifest: unknown): { valid: boolean; errors: string[] };
+export function createVariant(manifest: SubjectiveManifest, options?: { seed?: string | number; context?: SubjectiveContext; novelty?: number }): SubjectiveVariant;
+export function createVariants(manifest: SubjectiveManifest, options?: { count?: number; seed?: string | number; context?: SubjectiveContext; novelty?: number }): SubjectiveVariant[];
+export function normalizeContext(context?: SubjectiveContext): Required<SubjectiveContext>;
+export function variantDistance(left: SubjectiveVariant, right: SubjectiveVariant): number;
+export class LocalProvider { name: string; compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest>; }
+export class JsonHttpProvider { constructor(options: Record<string, unknown>); compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest>; }
+export function compileWithProvider(source: string, options?: Record<string, unknown>): Promise<{ manifest: SubjectiveManifest; provider: string; fallback: boolean; warning?: string }>;
+export function defineAction(contract: ActionContract): Readonly<ActionContract>;
+export function defineComponent(contract: ComponentContract): Readonly<ComponentContract>;
+export function defineComponentRegistry(input?: { components?: ComponentContract[]; actions?: ActionContract[] }): ComponentRegistry;
+export function createDefaultComponentRegistry(manifest: SubjectiveManifest): ComponentRegistry;
+export function createSubjectivePlan(manifest: SubjectiveManifest, variant: SubjectiveVariant, options?: { registry?: ComponentRegistry }): SubjectivePlan;
+export function validatePlan(plan: unknown, manifest: SubjectiveManifest, registry: ComponentRegistry): { valid: boolean; errors: string[] };
+export const SUBJECTIVE_C_VERSION: string;
+export const MANIFEST_SCHEMA: string;
+export const VARIANT_SCHEMA: string;
+export const REGISTRY_SCHEMA: string;
+export const PLAN_SCHEMA: string;
+export const CAPABILITY_KINDS: readonly string[];

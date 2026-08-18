@@ -1,0 +1,60 @@
+# Roadmap
+
+## 0.1 — Architecture proof
+
+Implemented in this repository:
+
+- Local English compiler
+- Versioned manifest
+- Seeded variation engine
+- Browser runtime and inspector
+- Static build and development server
+- Provider interface and fallback
+- Reference application
+- Tests, schemas, docs, and open-source scaffolding
+
+## 0.2 — Safety and component contracts
+
+Implemented in the alpha:
+
+- Component and action registries
+- Runtime capability declarations and trusted plans
+- Required-action reachability checks across context/novelty cohorts
+- Permission and destructive-action metadata
+- Stable context-derived assignments with explicit reinterpretation
+- Atomic builds and guarded output paths
+- Provider markup hardening
+- Browser, accessibility, semantic, benchmark, doctor, and release gates
+
+Still planned: application-owned component packages, host-enforced permissions, theme tokens, persisted preference UI, richer domain extraction, and manifest diagnostics.
+
+## 0.3 — Framework adapters
+
+- React adapter
+- Server-rendering adapter
+- Routing and nested layouts
+- Data loading contracts
+- Form and mutation contracts
+- Streaming interpretations without layout shift
+
+## 0.4 — Evaluation
+
+- Extended accessibility evaluation and manual assistive-technology studies
+- Muscle-memory and task-completion studies
+- Variant quality scoring
+- Snapshot and semantic regression tests
+- Experiment assignment and analytics hooks
+- Privacy-preserving feedback signals
+
+## 0.5 — Compiler ecosystem
+
+- Official remote-provider protocol
+- Domain-specific compiler packs
+- Manifest migrations
+- Policy linting
+- Visual diff tooling
+- Source-to-manifest explanation traces
+
+## 1.0 — Production contract
+
+The project should not call itself production-ready until it has stable schemas, policy verification, security review, migration guarantees, framework integration, accessibility evidence, and real user research on adaptive-interface trust.

@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a capability or architectural improvement
+title: "[proposal] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: Describe the user problem rather than only the proposed API.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+    validations:
+      required: true
+  - type: textarea
+    id: invariants
+    attributes:
+      label: Invariants and risks
+      description: What must remain stable? What could harm accessibility, trust, or security?
+    validations:
+      required: true
