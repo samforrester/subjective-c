@@ -17,10 +17,22 @@ export function escapeHtml(value) {
 }
 
 function slug(value) {
-  return String(value ?? "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  const input = String(value ?? "").toLowerCase().slice(0, 256);
+  let output = "";
+  let separator = false;
+  for (const character of input) {
+    const code = character.charCodeAt(0);
+    const isAsciiLetter = code >= 97 && code <= 122;
+    const isDigit = code >= 48 && code <= 57;
+    if (isAsciiLetter || isDigit) {
+      if (separator && output) output += "-";
+      output += character;
+      separator = false;
+    } else {
+      separator = true;
+    }
+  }
+  return output;
 }
 
 function shortGoal(goal, mode) {
@@ -180,7 +192,8 @@ function renderMetrics(data, variant) {
 }
 
 function renderStatus(status) {
-  return `<span class="sc-status sc-status-${slug(status)}"><i aria-hidden="true"></i>${escapeHtml(status || "Unknown")}</span>`;
+  const label = String(status || "Unknown").slice(0, 128);
+  return `<span class="sc-status sc-status-${slug(label)}"><i aria-hidden="true"></i>${escapeHtml(label)}</span>`;
 }
 
 function renderProgress(value) {
@@ -193,7 +206,10 @@ function renderTags(tags = []) {
 }
 
 function itemSearchText(item) {
-  return [item.name, item.status, item.owner, item.description, ...(item.tags || [])].filter(Boolean).join(" ");
+  return [item.name, item.status, item.owner, item.description, ...(item.tags || [])]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 2048);
 }
 
 function renderItemCard(item, index) {
@@ -504,6 +520,11 @@ function themeStyle(variant, tokens = {}) {
   return declarations.join(";");
 }
 
+function classToken(value, fallback) {
+  const token = String(value ?? "");
+  return token.length <= 64 && SAFE_ID.test(token) ? token : fallback;
+}
+
 export function renderSubjectiveMarkup(state) {
   const { manifest, variant, plan, data = {}, source = manifest?.source?.text || "", devtools = true, locked = false } = state;
   if (!manifest || !variant) throw new Error("renderSubjectiveMarkup requires a manifest and variant.");
@@ -515,15 +536,15 @@ export function renderSubjectiveMarkup(state) {
   const sections = (plan?.sectionOrder || variant.composition.sections).map((name) => renderSection(name, manifest, data, variant)).join("");
   const shellClasses = [
     "sc-shell",
-    `sc-layout-${variant.layout}`,
-    `sc-density-${preferences.density || variant.density}`,
-    `sc-palette-${preferences.contrast === "high" ? "high-contrast" : preferences.palette || variant.theme.palette}`,
-    `sc-motion-${preferences.motion || variant.theme.motion}`,
+    `sc-layout-${classToken(variant.layout, "stacked")}`,
+    `sc-density-${classToken(preferences.density || variant.density, "balanced")}`,
+    `sc-palette-${classToken(preferences.contrast === "high" ? "high-contrast" : preferences.palette || variant.theme.palette, "neutral")}`,
+    `sc-motion-${classToken(preferences.motion || variant.theme.motion, "subtle")}`,
     devtools ? "sc-with-devtools" : ""
   ].filter(Boolean).join(" ");
 
   return `
-    <div class="${shellClasses}" style="${style}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}">
+    <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}">
       <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i></div>
       ${variant.navigation === "side" ? renderSidebar(manifest, variant) : ""}
       <div class="sc-app-frame">

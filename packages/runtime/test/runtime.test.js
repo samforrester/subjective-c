@@ -54,6 +54,40 @@ test("provider-controlled glyphs are escaped before HTML interpolation", () => {
   assert.match(html, /&lt;img src=x/);
 });
 
+test("top-level class and style attributes cannot be escaped by library input", () => {
+  const html = renderSubjectiveMarkup({
+    manifest,
+    variant: { ...variant, layout: 'grid\" onmouseover=\"alert(1)' },
+    themeTokens: { accent: '\" onfocus=\"alert(2)' },
+    data: {},
+    devtools: false
+  });
+  const dom = new JSDOM(`<!doctype html><div id="root">${html}</div>`);
+  const shell = dom.window.document.querySelector(".sc-shell");
+  assert.ok(shell);
+  assert.equal(shell.hasAttribute("onmouseover"), false);
+  assert.equal(shell.hasAttribute("onfocus"), false);
+  assert.doesNotMatch(shell.getAttribute("class"), /onmouseover/);
+  dom.window.close();
+});
+
+test("status slugging remains bounded for pathological library input", () => {
+  const baseline = renderSubjectiveMarkup({
+    manifest,
+    variant,
+    data: { items: [{ name: "Pathological", status: "Planned" }] },
+    devtools: false
+  });
+  const html = renderSubjectiveMarkup({
+    manifest,
+    variant,
+    data: { items: [{ name: "Pathological", status: "-".repeat(1_000_000) }] },
+    devtools: false
+  });
+  assert.match(html, /class="sc-status sc-status-"/);
+  assert.equal(html.length - baseline.length < 2_500, true);
+});
+
 test("a plan must match the current manifest and variant", () => {
   assert.throws(() => renderSubjectiveMarkup({
     manifest,
