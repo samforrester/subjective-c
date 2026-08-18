@@ -10,7 +10,7 @@ npm run dev
 
 Try these in the runtime inspector:
 
-1. Use **SF lens** to jump between Muni Control, Sutro Fog Observatory, SFO Departures, Ferry Tide Table, Mission After Dark, Golden Gate Load Monitor, Exploratorium Field Lab, Ship Command, and BART Platform.
+1. Use **SF lens** to jump between Muni Control, Sutro Fog Observatory, SFO Departures, Ferry Tide Table, Mission After Dark, Golden Gate Load Monitor, Exploratorium Field Lab, Ship Command, BART Platform, Farallon Gravity Array, and Market Street Dream Fold.
 2. Switch the user model between novice, returning, and expert.
 3. Move novelty from 20% to 90%.
 4. Rewrite the intent and press **Compile intent**.
@@ -23,4 +23,8 @@ Every lens is directly addressable for demos and screenshots:
 http://127.0.0.1:4173/?interpretation=mission-neon
 http://127.0.0.1:4173/?interpretation=ship-command
 http://127.0.0.1:4173/?interpretation=sutro-fog
+http://127.0.0.1:4173/?interpretation=gravity-well
+http://127.0.0.1:4173/?interpretation=dream-fold
 ```
+
+Use `[` and `]` to travel backward and forward through the city without opening the inspector.

@@ -66,6 +66,8 @@ test("renderSubjectiveMarkup exposes SF interpretation chrome and adaptive langu
   assert.match(html, /data-sc-interpretation="muni-control"/);
   assert.match(html, /Muni Control/);
   assert.match(html, /Market Street/);
+  assert.match(html, /Reality confidence/);
+  assert.match(html, /San Francisco interpretation navigator/);
   assert.match(html, /Active lines/);
   assert.match(html, /Service advisory/);
 });

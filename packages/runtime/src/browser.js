@@ -15,7 +15,9 @@ const INTERPRETATION_OPTIONS = Object.freeze([
   ["golden-gate", "Golden Gate Load Monitor"],
   ["exploratorium-lab", "Exploratorium Field Lab"],
   ["ship-command", "Ship Command"],
-  ["bart-platform", "BART Platform"]
+  ["bart-platform", "BART Platform"],
+  ["gravity-well", "Farallon Gravity Array"],
+  ["dream-fold", "Market Street Dream Fold"]
 ]);
 
 export function escapeHtml(value) {
@@ -84,8 +86,40 @@ function interpretationCopy(variant) {
     "golden-gate": { collection: "Structural spans", activity: "Sensor record", signal: "Load advisory", hero: "Bridge monitor" },
     "exploratorium-lab": { collection: "Field experiments", activity: "Observation log", signal: "Instrument reading", hero: "Public laboratory" },
     "ship-command": { collection: "Active deployments", activity: "Ship log", signal: "Command signal", hero: "Release command" },
-    "bart-platform": { collection: "Platform arrivals", activity: "System messages", signal: "Platform notice", hero: "Regional wayfinder" }
+    "bart-platform": { collection: "Platform arrivals", activity: "System messages", signal: "Platform notice", hero: "Regional wayfinder" },
+    "gravity-well": { collection: "Objects in orbit", activity: "Relativity log", signal: "Temporal divergence", hero: "Gravity array" },
+    "dream-fold": { collection: "Nested realities", activity: "Layer memory", signal: "Reality confidence", hero: "Dream architecture" }
   }[id] || { collection: "Current workspace", activity: "Recent activity", signal: "Subjective signal", hero: "Adaptive runtime" };
+}
+
+function interpretationPosition(variant) {
+  const id = interpretationMeta(variant).id;
+  const index = Math.max(0, INTERPRETATION_OPTIONS.findIndex(([value]) => value === id));
+  return { index, total: INTERPRETATION_OPTIONS.length };
+}
+
+function shiftedInterpretation(variant, delta) {
+  const { index, total } = interpretationPosition(variant);
+  return INTERPRETATION_OPTIONS[(index + delta + total) % total][0];
+}
+
+function renderExperienceChrome(variant) {
+  const interpretation = interpretationMeta(variant);
+  const { index, total } = interpretationPosition(variant);
+  const counter = `${String(index + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
+  const transmission = `${interpretation.label} — ${interpretation.location} — intent is the source — interface is the interpretation — `;
+  return `
+    <div class="sc-scroll-progress" aria-hidden="true"><i></i></div>
+    <div class="sc-pointer-aura" aria-hidden="true"></div>
+    <div class="sc-showcase-cursor" aria-hidden="true"><i></i><span>EXPLORE</span></div>
+    <div class="sc-ghost-title" data-echo="${escapeHtml(interpretation.label)}" aria-hidden="true">${escapeHtml(interpretation.label)}</div>
+    <div class="sc-reality-meter" aria-hidden="true"><span>Reality confidence</span><i></i><i></i><i></i><b>${Math.max(1, Math.round((1 - variant.novelty) * 100))}%</b></div>
+    <nav class="sc-scene-nav" aria-label="San Francisco interpretation navigator">
+      <button type="button" data-sc-lens-shift="-1" aria-label="Previous SF lens">↑</button>
+      <span><b>${counter}</b><small>${escapeHtml(interpretation.location)}</small></span>
+      <button type="button" data-sc-lens-shift="1" aria-label="Next SF lens">↓</button>
+    </nav>
+    <div class="sc-transmission" aria-hidden="true"><div>${escapeHtml(transmission.repeat(4))}</div></div>`;
 }
 
 function renderLogo(manifest, compact = false) {
@@ -594,6 +628,7 @@ export function renderSubjectiveMarkup(state) {
 
   return `
     <div class="${escapeHtml(shellClasses)}" style="${escapeHtml(style)}" data-sc-variant="${escapeHtml(variant.id)}" data-sc-manifest="${escapeHtml(manifest.source.hash)}" data-sc-interpretation="${escapeHtml(interpretation.id)}">
+      ${renderExperienceChrome(variant)}
       <div class="sc-city-chrome" aria-hidden="true"><span>37.7749° N / 122.4194° W</span><strong>${escapeHtml(interpretation.symbol)}</strong><span>${escapeHtml(interpretation.location)} / LIVE</span></div>
       <div class="sc-backdrop" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
       ${variant.navigation === "side" ? renderSidebar(manifest, variant) : ""}
@@ -709,6 +744,12 @@ function bindSubjective(target, state, options = {}) {
   target.onclick = async (event) => {
     const element = event.target.closest("button, a, [data-sc-item]");
     if (!element || !target.contains(element)) return;
+
+    const lensShift = element.closest("[data-sc-lens-shift]");
+    if (lensShift) {
+      callbacks.onInterpretationChange?.(shiftedInterpretation(state.variant, Number(lensShift.getAttribute("data-sc-lens-shift"))));
+      return;
+    }
 
     if (element.matches("[data-sc-inspector-toggle]")) {
       const inspector = target.querySelector(".sc-inspector");
@@ -887,8 +928,31 @@ function bindSubjective(target, state, options = {}) {
     }
     if (event.key.toLowerCase() === "r") callbacks.onRegenerate?.();
     if (event.key.toLowerCase() === "n") target.querySelector('[data-sc-action-kind="create"]')?.click();
+    if (event.key === "[") callbacks.onInterpretationChange?.(shiftedInterpretation(state.variant, -1));
+    if (event.key === "]") callbacks.onInterpretationChange?.(shiftedInterpretation(state.variant, 1));
   };
   window.addEventListener("keydown", target.__subjectiveKeyHandler);
+
+  if (target.__subjectivePointerHandler) window.removeEventListener("pointermove", target.__subjectivePointerHandler);
+  target.__subjectivePointerHandler = (event) => {
+    target.__subjectivePointer = { x: event.clientX, y: event.clientY };
+    if (target.__subjectivePointerFrame) return;
+    target.__subjectivePointerFrame = requestAnimationFrame(() => {
+      target.style.setProperty("--sc-pointer-x", `${target.__subjectivePointer.x}px`);
+      target.style.setProperty("--sc-pointer-y", `${target.__subjectivePointer.y}px`);
+      target.classList.add("sc-pointer-active");
+      target.__subjectivePointerFrame = null;
+    });
+  };
+  window.addEventListener("pointermove", target.__subjectivePointerHandler, { passive: true });
+
+  if (target.__subjectiveScrollHandler) window.removeEventListener("scroll", target.__subjectiveScrollHandler);
+  target.__subjectiveScrollHandler = () => {
+    const maximum = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    target.style.setProperty("--sc-scroll", String(Math.min(1, Math.max(0, window.scrollY / maximum))));
+  };
+  window.addEventListener("scroll", target.__subjectiveScrollHandler, { passive: true });
+  target.__subjectiveScrollHandler();
 
   return {
     update(nextState) {
@@ -896,7 +960,13 @@ function bindSubjective(target, state, options = {}) {
     },
     destroy() {
       if (target.__subjectiveKeyHandler) window.removeEventListener("keydown", target.__subjectiveKeyHandler);
+      if (target.__subjectivePointerHandler) window.removeEventListener("pointermove", target.__subjectivePointerHandler);
+      if (target.__subjectiveScrollHandler) window.removeEventListener("scroll", target.__subjectiveScrollHandler);
+      if (target.__subjectivePointerFrame) cancelAnimationFrame(target.__subjectivePointerFrame);
       target.__subjectiveKeyHandler = null;
+      target.__subjectivePointerHandler = null;
+      target.__subjectiveScrollHandler = null;
+      target.__subjectivePointerFrame = null;
       createForm?.removeEventListener("submit", createSubmitHandler);
       target.onclick = null;
       target.oninput = null;

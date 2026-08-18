@@ -206,6 +206,18 @@ function persistSeed() {
   else localStorage.removeItem("subjective-c:seed");
 }
 
+function transition(update) {
+  if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(() => {
+      update();
+      render();
+    });
+    return;
+  }
+  update();
+  render();
+}
+
 function render() {
   const variant = createVariant(manifest, { seed, context, novelty, interpretation: interpretation || undefined });
   const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
@@ -227,9 +239,10 @@ function render() {
     callbacks: {
       onRegenerate: reinterpret,
       onInterpretationChange(value) {
-        interpretation = value;
-        seed = freshSeed();
-        render();
+        transition(() => {
+          interpretation = value;
+          seed = freshSeed();
+        });
       },
       onInspectorChange(open) {
         inspectorOpen = open;
@@ -279,9 +292,10 @@ function render() {
 }
 
 function reinterpret() {
-  seed = freshSeed();
-  persistSeed();
-  render();
+  transition(() => {
+    seed = freshSeed();
+    persistSeed();
+  });
 }
 
 window.addEventListener("subjective:action", (event) => {

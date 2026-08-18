@@ -21,6 +21,9 @@ try {
   await page.getByRole("button", { name: /new project/i }).first().click();
   await page.getByRole("dialog").waitFor();
   await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  const firstLens = await page.locator(".sc-shell").getAttribute("data-sc-interpretation");
+  await page.keyboard.press("]");
+  await page.waitForFunction((previous) => document.querySelector(".sc-shell")?.dataset.scInterpretation !== previous, firstLens);
   const enforcement = await page.evaluate(async () => {
     const { mountSubjective } = await import("./_subjective/runtime/browser.js");
     const host = document.createElement("div");
@@ -69,16 +72,16 @@ try {
   if (enforcement.deniedWithoutHost.executed !== 0 || enforcement.deniedWithoutHost.denied !== 1 || enforcement.authorized.executed !== 1) {
     throw new Error(`Action enforcement failed: ${JSON.stringify(enforcement)}`);
   }
-  const paletteSeeds = ["audit-0", "audit-1", "audit-2", "audit-3", "audit-12", "audit-28"];
-  for (const seed of paletteSeeds) {
-    await page.goto(`${app.url}?seed=${seed}`);
+  const interpretations = ["muni-control", "sutro-fog", "sfo-departures", "ferry-tide", "mission-neon", "golden-gate", "exploratorium-lab", "ship-command", "bart-platform", "gravity-well", "dream-fold"];
+  for (const interpretation of interpretations) {
+    await page.goto(`${app.url}?seed=audit&interpretation=${interpretation}`);
     const results = await new AxeBuilder({ page }).exclude(".sc-inspector").analyze();
     if (results.violations.length) {
       const details = results.violations.flatMap(({ id, nodes }) => nodes.map(({ target }) => `${id}: ${target.join(" ")}`));
-      throw new Error(`Accessibility violations for ${seed}: ${details.join(", ")}`);
+      throw new Error(`Accessibility violations for ${interpretation}: ${details.join(", ")}`);
     }
   }
-  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, keyboard search, dialogs, and six-palette axe checks passed");
+  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, keyboard navigation, dialogs, and eleven-lens axe checks passed");
 } finally {
   await context.close();
   await browser.close();

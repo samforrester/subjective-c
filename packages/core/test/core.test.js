@@ -104,7 +104,7 @@ test("createVariants returns distinct reproducible candidates", () => {
 
 test("SF interpretations can be pinned and preserve their operational identity", () => {
   const manifest = compileSubjective(source);
-  assert.equal(SUBJECTIVE_INTERPRETATIONS.length, 9);
+  assert.equal(SUBJECTIVE_INTERPRETATIONS.length, 11);
   for (const interpretation of SUBJECTIVE_INTERPRETATIONS) {
     const variant = createVariant(manifest, {
       seed: `pinned:${interpretation.id}`,
