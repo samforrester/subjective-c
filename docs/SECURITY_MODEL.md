@@ -8,7 +8,7 @@
 - A plan may reference only registered component and action IDs.
 - The runtime emits semantic action requests; the host owns authorization and execution.
 
-## Enforced in 0.2 alpha
+## Enforced in the current alpha
 
 - Provider-controlled values are escaped before HTML interpolation.
 - Static builds ship a restrictive script/object/base Content Security Policy.

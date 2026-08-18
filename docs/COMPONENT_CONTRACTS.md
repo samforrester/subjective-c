@@ -35,3 +35,5 @@ Component packages group an application-owned registry with named, validated the
 The runtime may change where or how an action appears. It may not invent an action ID, change its label contract, bypass its permission, or execute it. A permissioned action is denied unless `authorizeAction` returns exactly `true`. A destructive action also requires confirmation copy and a successful host or built-in confirmation step. Hosts must enforce authorization again at the domain boundary because client-side checks are defense in depth, not the final authority.
 
 Run `diagnoseSubjective({ manifest, registry, plan })` before mounting to receive stable diagnostic codes for invalid manifests, unregistered or unreachable capabilities, missing permission hosts, confirmation gaps, and invalid plans.
+
+In React, `SubjectiveComposition` is the application-owned rendering path. It resolves component IDs exclusively from the verified plan and registry, calls registered React render functions, and exposes `invokeAction` for the plan's trusted actions. The reference `SubjectiveRoot` remains available when an application wants the bundled Orbit-style runtime vocabulary.

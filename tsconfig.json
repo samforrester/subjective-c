@@ -3,11 +3,11 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],
     "strict": true,
     "noEmit": true,
     "skipLibCheck": false
   },
-  "include": ["tests/types.ts"]
+  "include": ["tests/types.ts", "examples/react-orbit/App.tsx"]
 }
-

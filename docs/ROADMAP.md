@@ -34,11 +34,19 @@ Still planned: richer domain extraction and application-specific diagnostic exte
 
 ## 0.3 — Framework adapters
 
-- React adapter
-- Server-rendering adapter
+Implemented in the first 0.3 alpha:
+
+- React 19 provider and runtime-root adapter
+- Static server-rendering primitive
 - Routing and nested layouts
-- Data loading contracts
+- Abortable parallel data loading contracts
 - Form and mutation contracts
+- Suspense boundary for already-started data promises
+
+Still planned:
+
+- Interactive server rendering and hydration
+- Additional framework adapters
 - Streaming interpretations without layout shift
 
 ## 0.4 — Evaluation

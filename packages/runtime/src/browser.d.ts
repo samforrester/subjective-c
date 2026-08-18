@@ -27,7 +27,7 @@ export type RuntimeCallbacks = {
   onPreferenceChange?(preferences: Readonly<RuntimePreferences>): void;
   authorizeAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
   confirmAction?(detail: RuntimeActionDetail): boolean | Promise<boolean>;
-  onAction?(detail: RuntimeActionDetail): void;
+  onAction?(detail: RuntimeActionDetail): unknown;
   onActionDenied?(detail: RuntimeActionDetail & { reason: "permission-denied" | "confirmation-declined" }): void;
   onActionError?(failure: { detail: RuntimeActionDetail; error: unknown }): void;
 };
@@ -39,6 +39,7 @@ export type RuntimeActionDetail = {
   permission: string | null;
   destructive: boolean;
   confirmation: ActionContract["confirmation"];
+  payload?: unknown;
 };
 
 export type RuntimePreferences = {
@@ -64,7 +65,7 @@ export type RuntimeState = {
 
 export function escapeHtml(value: unknown): string;
 export function normalizePreferences(input?: RuntimePreferences): Readonly<RuntimePreferences>;
-export function createPreferenceStore(options?: { key?: string; storage?: Pick<Storage, "getItem" | "setItem" | "removeItem"> }): { load(): Readonly<RuntimePreferences>; save(preferences: RuntimePreferences): Readonly<RuntimePreferences>; clear(): void };
+export function createPreferenceStore(options?: { key?: string; legacyKey?: string | false; storage?: Pick<Storage, "getItem" | "setItem" | "removeItem"> }): { load(): Readonly<RuntimePreferences>; save(preferences: RuntimePreferences): Readonly<RuntimePreferences>; clear(): void };
 export function renderSubjectiveMarkup(state: RuntimeState): string;
 export function mountSubjective(target: Element, state: RuntimeState): {
   update(nextState: RuntimeState): unknown;

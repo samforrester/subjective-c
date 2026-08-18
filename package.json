@@ -1,6 +1,6 @@
 {
   "name": "subjective-c-monorepo",
-  "version": "0.2.0-alpha.2",
+  "version": "0.3.0-alpha.1",
   "private": true,
   "type": "module",
   "description": "Intent-first, adaptive UI framework.",
@@ -13,8 +13,8 @@
     "dev": "node packages/cli/bin/subjective.js dev examples/orbit",
     "inspect": "node packages/cli/bin/subjective.js inspect examples/orbit/app.subjective",
     "doctor": "node packages/cli/bin/subjective.js doctor examples/orbit",
-    "test": "node --test packages/core/test/*.test.js packages/runtime/test/*.test.js packages/cli/test/*.test.js",
-    "test:coverage": "node --experimental-test-coverage --test packages/core/test/*.test.js packages/runtime/test/*.test.js packages/cli/test/*.test.js",
+    "test": "node --test packages/core/test/*.test.js packages/runtime/test/*.test.js packages/react/test/*.test.js packages/cli/test/*.test.js",
+    "test:coverage": "node --experimental-test-coverage --test packages/core/test/*.test.js packages/runtime/test/*.test.js packages/react/test/*.test.js packages/cli/test/*.test.js",
     "test:semantics": "node scripts/check-reachability.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "browser:install": "node scripts/install-browser.mjs",
@@ -38,6 +38,11 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "typescript": "^7.0.2"
   }
 }

@@ -1,0 +1,39 @@
+{
+  "name": "@subjective-c/react",
+  "version": "0.3.0-alpha.1",
+  "description": "React adapter for Subjective C plans and runtime state.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/client.d.ts",
+      "default": "./src/client.js"
+    },
+    "./server": {
+      "types": "./src/server.d.ts",
+      "default": "./src/server.js"
+    },
+    "./router": {
+      "types": "./src/router.d.ts",
+      "default": "./src/router.js"
+    },
+    "./forms": {
+      "types": "./src/forms.d.ts",
+      "default": "./src/forms.js"
+    }
+  },
+  "files": ["src", "README.md"],
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "@subjective-c/core": "0.3.0-alpha.1",
+    "@subjective-c/runtime": "0.3.0-alpha.1"
+  },
+  "engines": { "node": ">=20.11" },
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/samforrester/subjective-c.git", "directory": "packages/react" },
+  "homepage": "https://github.com/samforrester/subjective-c#readme",
+  "bugs": "https://github.com/samforrester/subjective-c/issues",
+  "publishConfig": { "access": "public", "provenance": true }
+}
