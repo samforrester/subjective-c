@@ -1,6 +1,6 @@
 {
   "name": "@subjective-c/core",
-  "version": "0.3.0-alpha.3",
+  "version": "0.4.0-alpha.1",
   "description": "The Subjective C intent compiler and variation engine.",
   "type": "module",
   "exports": {
@@ -18,8 +18,15 @@
     "node": ">=20.11"
   },
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/samforrester/subjective-c.git", "directory": "packages/core" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samforrester/subjective-c.git",
+    "directory": "packages/core"
+  },
   "homepage": "https://github.com/samforrester/subjective-c#readme",
   "bugs": "https://github.com/samforrester/subjective-c/issues",
-  "publishConfig": { "access": "public", "provenance": true }
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

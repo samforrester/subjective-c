@@ -4,4 +4,4 @@ export {
   renderSubjectiveMarkup
 } from "./browser.js";
 
-export const SUBJECTIVE_RUNTIME_VERSION = "0.3.0-alpha.3";
+export const SUBJECTIVE_RUNTIME_VERSION = "0.4.0-alpha.1";

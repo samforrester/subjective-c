@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.4.0-alpha.1 — 2026-08-19
+
+- Added an intent-adaptation engine that resolves declared searches and in-session behavior into a bounded, explainable visitor model.
+- Added configurable intent catalogs, session/local/memory persistence, and data overlays that preserve the canonical application contract.
+- Added conversational adaptive marketing surfaces, suggested intents, evidence disclosure, and a one-click reset without changing the canonical URL.
+- Rebuilt the reference application as Same SF with six purpose-built San Francisco discovery intents spanning outdoors, social plans, nightlife, dates, family visits, and broad discovery.
+- Added typed runtime callbacks and public core APIs for visitor signals, adaptation resolution, and reset behavior.
+- Added adaptive search, URL-stability, permission, dialog, keyboard, and eleven-interpretation accessibility coverage to the protected browser gate.
+
 - Added eleven pin-able San Francisco interpretation lenses spanning transit, infrastructure, science, waterfront, nightlife, Vercel Ship-inspired command systems, gravitational time dilation, and dream-fold geometry.
 - Added interpretation-aware layouts, palettes, language, environmental chrome, motion, and responsive behavior.
 - Added a live SF lens selector to the runtime inspector and `?interpretation=<id>` demo URLs.
