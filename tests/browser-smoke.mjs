@@ -37,7 +37,10 @@ try {
     const host = document.createElement("div");
     document.body.append(host);
     const base = window.SubjectiveC;
-    const actionId = base.manifest.capabilities[0].id;
+    const primaryCapability = base.manifest.capabilities.find(({ kind }) => kind === "create")
+      || base.manifest.capabilities.find(({ required }) => required)
+      || base.manifest.capabilities[0];
+    const actionId = primaryCapability.id;
     const securedPlan = {
       ...base.plan,
       actions: base.plan.actions.map((action) => action.id === actionId ? {
