@@ -7,6 +7,9 @@ import {
   defineComponentPackage,
   defineComponentRegistry,
   diagnoseSubjective,
+  createVisitorModel,
+  observeVisitorSignal,
+  resolveAdaptiveData,
   SUBJECTIVE_INTERPRETATIONS,
   createSubjectivePlan,
   createVariant,
@@ -15,6 +18,15 @@ import {
   validateManifest,
   variantDistance
 } from "../src/index.js";
+
+const adaptation = {
+  defaultIntent: "discover",
+  intents: [
+    { id: "discover", label: "Discover", keywords: ["surprise", "anything"], interpretation: "dream-fold" },
+    { id: "outdoors", label: "Get outside", keywords: ["hike", "trail", "outside"], interpretation: "golden-gate" },
+    { id: "nightlife", label: "Go out", keywords: ["dance", "club", "dj"], interpretation: "mission-neon" }
+  ]
+};
 
 const source = `# Orbit
 
@@ -92,6 +104,33 @@ test("context changes the interpretation policy", () => {
   assert.equal(novice.composition.copyMode, "explanatory");
   assert.equal(expert.composition.copyMode, "terse");
   assert.notEqual(novice.density, expert.density);
+});
+
+test("visitor evidence resolves intent without changing the canonical data contract", () => {
+  const initial = createVisitorModel(adaptation);
+  const searched = observeVisitorSignal(initial, { kind: "search", text: "a sunset hike and trail" }, adaptation);
+  assert.equal(searched.intent, "outdoors");
+  assert.ok(searched.confidence > 0.5);
+  assert.match(searched.reasons[0], /search/i);
+  const resolved = resolveAdaptiveData({ stable: "same", experiences: { outdoors: { hero: { title: "Find the edge" } } } }, searched, adaptation);
+  assert.equal(resolved.stable, "same");
+  assert.equal(resolved.hero.title, "Find the edge");
+  assert.equal(resolved.adaptation.intent, "outdoors");
+});
+
+test("explicit visitor choices outweigh earlier behavioral evidence and remain bounded", () => {
+  let model = createVisitorModel(adaptation);
+  model = observeVisitorSignal(model, { kind: "search", text: "hike trail outside" }, adaptation);
+  model = observeVisitorSignal(model, { kind: "select", intent: "nightlife" }, adaptation);
+  assert.equal(model.intent, "nightlife");
+  assert.equal(model.revision, 2);
+  assert.ok(model.evidence.length <= 16);
+});
+
+test("common search words do not create false intent ties", () => {
+  const model = observeVisitorSignal(createVisitorModel(adaptation), { kind: "search", text: "I want to dance" }, adaptation);
+  assert.equal(model.intent, "nightlife");
+  assert.equal(model.scores.discover, 0);
 });
 
 test("createVariants returns distinct reproducible candidates", () => {

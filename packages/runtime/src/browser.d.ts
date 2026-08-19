@@ -25,6 +25,8 @@ export type RuntimeCallbacks = {
   onNoveltyChange?(value: number): void;
   onDataChange?(data: SubjectiveData): void;
   onPreferenceChange?(preferences: Readonly<RuntimePreferences>): void;
+  onVisitorSignal?(signal: { kind: "search" | "select" | "view" | "engage"; text?: string; tags?: string[]; intent?: string }): void;
+  onAdaptationReset?(): void;
   onCinemaPhaseChange?(phase: "intro" | "live" | "outro"): void;
   onCinemaAutoplay?(): void;
   onCinemaExit?(): void;

@@ -140,6 +140,7 @@ function browserEntry({ source, manifest, data, config, registry, themeTokens, d
     inspectorOpen: config.inspectorOpen !== false,
     preferences: serializable(config.preferences, {}) || {},
     themeTokens: serializable(themeTokens, {}) || {},
+    adaptation: serializable(config.adaptation, {}) || {},
     context: {
       experience: config.context?.experience || "returning",
       device: config.context?.device || "auto",
@@ -151,14 +152,15 @@ function browserEntry({ source, manifest, data, config, registry, themeTokens, d
     }
   };
 
-  return `import { compileSubjective, createSubjectivePlan, createVariant, SUBJECTIVE_INTERPRETATIONS } from "./_subjective/core/index.js";
+  return `import { compileSubjective, createSubjectivePlan, createVariant, createVisitorModel, normalizeAdaptationConfig, observeVisitorSignal, resolveAdaptiveData, SUBJECTIVE_INTERPRETATIONS } from "./_subjective/core/index.js";
 import { createPreferenceStore, mountSubjective } from "./_subjective/runtime/browser.js";
 
 let source = ${JSON.stringify(source)};
 let manifest = ${JSON.stringify(manifest, null, 2)};
-let data = ${JSON.stringify(data, null, 2)};
+let baseData = ${JSON.stringify(data, null, 2)};
 const registry = ${JSON.stringify(registry, null, 2)};
 const configuredContext = ${JSON.stringify(safeConfig.context, null, 2)};
+const adaptationConfig = normalizeAdaptationConfig(${JSON.stringify(safeConfig.adaptation, null, 2)});
 
 function detectRuntimeContext(base) {
   const width = window.innerWidth;
@@ -188,6 +190,12 @@ const cinemaRecording = urlParameters.get("recording") === "1";
 document.documentElement.dataset.subjectiveCinemaRecording = cinemaRecording ? "on" : "off";
 const interpretationIds = new Set(SUBJECTIVE_INTERPRETATIONS.map(({ id }) => id));
 let interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : null;
+const visitorStorage = adaptationConfig.storage === "local" ? localStorage : adaptationConfig.storage === "session" ? sessionStorage : null;
+const visitorStorageKey = "subjective-c:visitor@1:" + manifest.source.hash;
+let visitorModel;
+try { visitorModel = createVisitorModel(adaptationConfig, JSON.parse(visitorStorage?.getItem(visitorStorageKey) || "{}")); }
+catch { visitorModel = createVisitorModel(adaptationConfig); }
+let data = resolveAdaptiveData(baseData, visitorModel, adaptationConfig);
 const cinemaSequence = ["gravity-well", "sutro-fog", "dream-fold", "mission-neon", "ferry-tide", "exploratorium-lab", "ship-command"];
 let cinemaAutoplayTimer = null;
 
@@ -244,6 +252,32 @@ function setInterpretation(value) {
   return true;
 }
 
+function persistVisitor() {
+  try { visitorStorage?.setItem(visitorStorageKey, JSON.stringify(visitorModel)); } catch {}
+}
+
+function recordVisitorSignal(signal, shouldRender = true) {
+  visitorModel = observeVisitorSignal(visitorModel, signal, adaptationConfig);
+  data = resolveAdaptiveData(baseData, visitorModel, adaptationConfig);
+  if (!interpretationFromUrl && visitorModel.interpretation && interpretationIds.has(visitorModel.interpretation)) interpretation = visitorModel.interpretation;
+  seed = "visitor:" + (visitorModel.intent || "default") + ":" + visitorModel.revision;
+  persistVisitor();
+  if (shouldRender) {
+    transition(() => {});
+    requestAnimationFrame(() => scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+  }
+}
+
+function resetAdaptation() {
+  visitorModel = createVisitorModel(adaptationConfig);
+  data = resolveAdaptiveData(baseData, visitorModel, adaptationConfig);
+  interpretation = interpretationIds.has(interpretationFromUrl) ? interpretationFromUrl : visitorModel.interpretation;
+  seed = assignedSeed(context);
+  try { visitorStorage?.removeItem(visitorStorageKey); } catch {}
+  transition(() => {});
+  requestAnimationFrame(() => scrollTo({ top: 0, behavior: "auto" }));
+}
+
 function toggleCinemaAutoplay(force) {
   const shouldPlay = force ?? !cinemaAutoplayTimer;
   if (cinemaAutoplayTimer) clearInterval(cinemaAutoplayTimer);
@@ -267,12 +301,13 @@ function exitCinema() {
 }
 
 function render() {
-  const variant = createVariant(manifest, { seed, context, novelty, interpretation: interpretation || undefined });
+  const adaptiveInterpretation = interpretation || (visitorModel.interpretation && interpretationIds.has(visitorModel.interpretation) ? visitorModel.interpretation : undefined);
+  const variant = createVariant(manifest, { seed, context, novelty, interpretation: adaptiveInterpretation });
   const plan = createSubjectivePlan(manifest, variant, registry ? { registry } : undefined);
   document.documentElement.dataset.subjectiveVariant = variant.id;
   document.documentElement.dataset.subjectiveLayout = variant.layout;
   document.documentElement.dataset.subjectiveInterpretation = variant.theme.interpretation;
-  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, reinterpret, setInterpretation, setCinemaPhase, toggleCinemaAutoplay, exitCinema };
+  window.SubjectiveC = { source, manifest, variant, plan, data, context, novelty, seed, interpretation, preferences, visitorModel, adaptationConfig, reinterpret, setInterpretation, recordVisitorSignal, resetAdaptation, setCinemaPhase, toggleCinemaAutoplay, exitCinema };
   mountSubjective(target, {
     source,
     manifest,
@@ -327,13 +362,18 @@ function render() {
         }
       },
       onDataChange(nextData) {
-        data = nextData;
+        baseData = nextData;
+        data = resolveAdaptiveData(baseData, visitorModel, adaptationConfig);
         render();
       },
       onPreferenceChange(nextPreferences) {
         preferences = preferenceStore.save(nextPreferences);
         render();
       },
+      onVisitorSignal(signal) {
+        recordVisitorSignal(signal, signal.kind !== "view");
+      },
+      onAdaptationReset: resetAdaptation,
       onToggleLock() {
         locked = !locked;
         localStorage.setItem("subjective-c:locked", String(locked));

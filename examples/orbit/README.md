@@ -1,6 +1,6 @@
-# Orbit example
+# Same SF reference application
 
-Orbit is the reference Subjective C application. Its source is an English product brief in `app.subjective`; the config supplies example data and a starting user context.
+Same SF is the first intent-adaptive marketing application built with Subjective C. Every visitor uses the same URL, place inventory, and semantic actions. Searches and in-session choices change the page's hierarchy, language, metrics, recommendations, density, and visual interpretation.
 
 From the repository root:
 
@@ -8,38 +8,40 @@ From the repository root:
 npm run dev
 ```
 
-Try these in the runtime inspector:
+Try these searches without changing the URL:
 
-1. Use **SF lens** to jump between Muni Control, Sutro Fog Observatory, SFO Departures, Ferry Tide Table, Mission After Dark, Golden Gate Load Monitor, Exploratorium Field Lab, Ship Command, BART Platform, Farallon Gravity Array, and Market Street Dream Fold.
-2. Switch the user model between novice, returning, and expert.
-3. Move novelty from 20% to 90%.
-4. Rewrite the intent and press **Compile intent**.
-5. Press **Reinterpret** or use the `R` shortcut.
-6. Lock a seed, refresh, then unlock it.
+- `a quiet sunset hike with ocean views`
+- `drinks in the Marina with a group of friends`
+- `somewhere to dance to house music`
+- `an intimate Italian date in North Beach`
+- `show my parents around without too much walking`
 
-Every lens is directly addressable for demos and screenshots:
+Use **Why this view?** to see the evidence behind the current interpretation or reset the session model. Evidence is bounded and stored in session storage by default. No demographic or sensitive attributes are inferred.
 
-```text
-http://127.0.0.1:4173/?interpretation=mission-neon
-http://127.0.0.1:4173/?interpretation=ship-command
-http://127.0.0.1:4173/?interpretation=sutro-fog
-http://127.0.0.1:4173/?interpretation=gravity-well
-http://127.0.0.1:4173/?interpretation=dream-fold
+The config demonstrates the adaptation contract:
+
+```js
+export default {
+  adaptation: {
+    storage: "session",
+    defaultIntent: "discover",
+    intents: [
+      {
+        id: "outdoors",
+        label: "Outside mode",
+        interpretation: "golden-gate",
+        keywords: ["hike", "trail", "sunset"]
+      }
+    ]
+  },
+  data: {
+    // canonical data shared by every visitor
+    experiences: {
+      // intent-specific presentation and content layers
+      outdoors: { hero, metrics, items, activity }
+    }
+  }
+};
 ```
 
-Use `[` and `]` to travel backward and forward through the city without opening the inspector.
-
-## Record the X demo
-
-Install the browser once, then render the launch cut:
-
-```bash
-npm run browser:install
-npm run demo:record
-```
-
-This produces a 1920×1080 source recording, an X-ready H.264 MP4 when `ffmpeg` is installed, and a PNG thumbnail in `artifacts/`. The GitHub Actions workflow **Render X demo video** produces the same downloadable assets without local setup.
-
-Open the cinematic surface directly with `?cinema=1`. Choose **Enter reality**, then use the arrow rail, `[` and `]`, or **Autopilot** to travel through the experience. **Open the lab** returns to the complete inspector.
-
-Add `&autoplay=1` to enter automatically and begin the director’s sequence. Its stable automation API is available at `window.SubjectiveC.setInterpretation(id)`, `window.SubjectiveC.setCinemaPhase(phase)`, and `window.SubjectiveC.toggleCinemaAutoplay()`.
+The generated runtime exposes `window.SubjectiveC.recordVisitorSignal(signal)` and `window.SubjectiveC.resetAdaptation()` for host integrations. Canonical navigation is untouched; adaptation does not push query parameters or rewrite history.

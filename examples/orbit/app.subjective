@@ -1,45 +1,50 @@
-# Orbit
+# Same SF
 
-Build a calm command center for a small product team. Help the team understand what is moving, what is blocked, and what deserves attention next. The interface can be reinterpreted on every refresh, but it should never feel random.
+Build one living San Francisco discovery site. Every visitor gets the same canonical URL, inventory, and trusted actions, but the page should reinterpret its language, hierarchy, recommendations, density, and visual system around what that person searches and explores during the session.
 
 ## Must
-- Make creating a new project obvious
-- Keep project search available
-- Preserve the meaning and wording of important actions
-- Show active work and ownership at a glance
+- Keep search for places obvious
+- Keep the canonical URL unchanged when the experience adapts
+- Preserve place identity, factual data, and action semantics across interpretations
+- Explain why the current view changed and let the visitor reset it
 
 ## Prefer
-- Use progressive disclosure instead of showing every control
-- Let returning users scan quickly
-- Make the interface feel alive without becoming distracting
+- Learn first from declared intent, searches, and in-session behavior
+- Move the most relevant decision criteria earlier instead of only changing recommendations
+- Let each intent feel like a purpose-built marketing site rather than a filtered catalog
 
 ## Avoid
-- Moving the primary action to an unfamiliar place
-- Modal-heavy workflows
-- Decorative variation that hurts accessibility
+- Inferring sensitive traits or using demographic stereotypes
+- Hiding inventory solely because it does not match the current model
+- Decorative variation without a decision-making purpose
 
 ## Adapt
-- New users should see more guidance and larger targets
-- Power users should get denser information and shorter copy
-- Mobile users should get a focused vertical flow
+- Outdoor intent should prioritize terrain, effort, weather, and daylight
+- Social intent should prioritize group energy, walking distance, and the next stop
+- Nightlife intent should prioritize music, set times, and momentum
+- Date intent should prioritize atmosphere, pacing, and sequence
+- Family intent should prioritize flexibility, transfers, and accessibility
 
 ## Audience
-- Small product teams
-- Product operators
+- People deciding what to do in San Francisco
+- Visitors and locals with different immediate intent
 
 ## Tone
-- Calm
-- precise
+- Editorial
+- energetic
 - human
-- slightly futuristic
+- trustworthy
+- experimental
 
 ## Data
-- Projects with a name, status, owner, progress, due date, description, and tags
+- Places with a name, neighborhood, category, description, tags, and visit detail
 
 ## Actions
-- Create a new project
-- Search projects
-- Filter by status
-- Invite a teammate
-- Review analytics
-- Inspect recent activity
+- Search places
+- Save a place
+- Open directions
+
+## Navigation
+- Explore
+- Neighborhoods
+- Saved

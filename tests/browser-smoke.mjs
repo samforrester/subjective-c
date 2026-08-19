@@ -12,31 +12,40 @@ const page = await context.newPage();
 
 try {
   await page.goto(`${app.url}?seed=browser-smoke`);
-  await page.getByRole("heading", { name: /good afternoon|orbit/i }).first().waitFor();
+  await page.getByRole("heading", { name: /which san francisco/i }).first().waitFor();
+  const canonicalUrl = page.url();
+  await page.getByRole("textbox", { name: "Describe what you want" }).fill("a quiet sunset hike with ocean views");
+  await page.getByRole("textbox", { name: "Describe what you want" }).press("Enter");
+  await page.getByRole("heading", { name: /find the edge of the city/i }).waitFor();
+  if (page.url() !== canonicalUrl) throw new Error(`Adaptive search changed the canonical URL: ${page.url()}`);
+  await page.getByText("Outside mode", { exact: true }).first().waitFor();
   await page.keyboard.press("/");
   const search = page.getByRole("searchbox");
   await search.fill("no-result-by-design");
-  await page.getByText(/no matching projects/i).waitFor();
+  await page.getByText(/no matching places/i).waitFor();
   await search.fill("");
-  await page.getByRole("button", { name: /new project/i }).first().click();
+  await page.getByRole("button", { name: /open lands end coastal trail/i }).click();
   await page.getByRole("dialog").waitFor();
-  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Close").click();
   if (await page.getByRole("dialog").isVisible()) await page.keyboard.press("Escape");
   await page.getByRole("dialog").waitFor({ state: "hidden" });
-  const firstLens = await page.locator(".sc-shell").getAttribute("data-sc-interpretation");
-  await page.getByRole("button", { name: "Next SF lens" }).click();
-  await page.waitForFunction((previous) => document.querySelector(".sc-shell")?.dataset.scInterpretation !== previous, firstLens);
+  await page.getByText("Why this view?", { exact: true }).click();
+  await page.getByRole("button", { name: "Reset my view" }).click();
+  await page.getByRole("heading", { name: /which san francisco/i }).waitFor();
   const enforcement = await page.evaluate(async () => {
     const { mountSubjective } = await import("./_subjective/runtime/browser.js");
     const host = document.createElement("div");
     document.body.append(host);
     const base = window.SubjectiveC;
-    const actionId = base.manifest.capabilities.find(({ kind }) => kind === "create").id;
+    const primaryCapability = base.manifest.capabilities.find(({ kind }) => kind === "create")
+      || base.manifest.capabilities.find(({ required }) => required)
+      || base.manifest.capabilities[0];
+    const actionId = primaryCapability.id;
     const securedPlan = {
       ...base.plan,
       actions: base.plan.actions.map((action) => action.id === actionId ? {
         ...action,
-        permission: "projects:create",
+        permission: "places:use",
         destructive: true,
         confirmation: { title: "Confirm create", description: "Test confirmation", confirmLabel: "Create" }
       } : action)
@@ -83,7 +92,7 @@ try {
       throw new Error(`Accessibility violations for ${interpretation}: ${details.join(", ")}`);
     }
   }
-  console.log("✓ browser interactions, permission enforcement, confirmation, preferences, reduced motion, scene navigation, keyboard search, dialogs, and eleven-lens axe checks passed");
+  console.log("✓ adaptive search, canonical URL stability, reset transparency, permission enforcement, confirmation, keyboard search, dialogs, and eleven-lens axe checks passed");
 } finally {
   await context.close();
   await browser.close();
