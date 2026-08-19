@@ -71,7 +71,7 @@ export async function initProject(targetDirectory, options = {}) {
   await writeText(resolve(target, "subjective.config.js"), CONFIG);
   await writeFile(resolve(target, "package.json"), `${JSON.stringify({
     name: packageName,
-    version: "0.3.0-alpha.3",
+    version: "0.4.0-alpha.1",
     private: true,
     type: "module",
     scripts: {
@@ -80,7 +80,7 @@ export async function initProject(targetDirectory, options = {}) {
       inspect: "subjective inspect app.subjective"
     },
     devDependencies: {
-      "subjective-c": "^0.3.0-alpha.3"
+      "subjective-c": "^0.4.0-alpha.1"
     }
   }, null, 2)}\n`, "utf8");
   await writeText(resolve(target, ".gitignore"), "node_modules/\ndist/\n.DS_Store\n");

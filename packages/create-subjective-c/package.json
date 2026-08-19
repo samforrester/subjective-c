@@ -1,6 +1,6 @@
 {
   "name": "create-subjective-c",
-  "version": "0.3.0-alpha.3",
+  "version": "0.4.0-alpha.1",
   "description": "Create a new Subjective C application.",
   "type": "module",
   "bin": {
@@ -11,14 +11,21 @@
     "README.md"
   ],
   "dependencies": {
-    "subjective-c": "0.3.0-alpha.3"
+    "subjective-c": "0.4.0-alpha.1"
   },
   "engines": {
     "node": ">=20.11"
   },
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/samforrester/subjective-c.git", "directory": "packages/create-subjective-c" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samforrester/subjective-c.git",
+    "directory": "packages/create-subjective-c"
+  },
   "homepage": "https://github.com/samforrester/subjective-c#readme",
   "bugs": "https://github.com/samforrester/subjective-c/issues",
-  "publishConfig": { "access": "public", "provenance": true }
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

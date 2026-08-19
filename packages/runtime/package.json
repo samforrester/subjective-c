@@ -1,6 +1,6 @@
 {
   "name": "@subjective-c/runtime",
-  "version": "0.3.0-alpha.3",
+  "version": "0.4.0-alpha.1",
   "description": "Dependency-free browser runtime for Subjective C manifests and variants.",
   "type": "module",
   "exports": {
@@ -23,8 +23,15 @@
   },
   "license": "MIT",
   "types": "./src/index.d.ts",
-  "repository": { "type": "git", "url": "git+https://github.com/samforrester/subjective-c.git", "directory": "packages/runtime" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samforrester/subjective-c.git",
+    "directory": "packages/runtime"
+  },
   "homepage": "https://github.com/samforrester/subjective-c#readme",
   "bugs": "https://github.com/samforrester/subjective-c/issues",
-  "publishConfig": { "access": "public", "provenance": true }
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
