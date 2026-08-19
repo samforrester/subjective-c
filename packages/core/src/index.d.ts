@@ -8,6 +8,34 @@ export type SubjectiveContext = {
   locale?: string;
 };
 
+export type AdaptationIntent = {
+  id: string;
+  label: string;
+  description?: string;
+  interpretation?: string;
+  keywords?: string[];
+  prompts?: string[];
+};
+
+export type AdaptationConfig = {
+  enabled?: boolean;
+  storage?: "session" | "local" | "none";
+  defaultIntent?: string;
+  intents: AdaptationIntent[];
+};
+
+export type VisitorModel = Readonly<{
+  schema: "subjective-c/visitor@0.1";
+  revision: number;
+  intent: string | null;
+  label: string;
+  interpretation: string | null;
+  confidence: number;
+  reasons: string[];
+  scores: Record<string, number>;
+  evidence: ReadonlyArray<{ intent: string; reason: string }>;
+}>;
+
 export type SubjectiveManifest = {
   schema: "subjective-c/manifest@0.2";
   name: string;
@@ -138,6 +166,10 @@ export function validateManifest(manifest: unknown): { valid: boolean; errors: s
 export function createVariant(manifest: SubjectiveManifest, options?: { seed?: string | number; context?: SubjectiveContext; novelty?: number; interpretation?: string }): SubjectiveVariant;
 export function createVariants(manifest: SubjectiveManifest, options?: { count?: number; seed?: string | number; context?: SubjectiveContext; novelty?: number; interpretation?: string }): SubjectiveVariant[];
 export function normalizeContext(context?: SubjectiveContext): Required<SubjectiveContext>;
+export function normalizeAdaptationConfig(config?: AdaptationConfig): Readonly<AdaptationConfig & { enabled: boolean; storage: string; defaultIntent: string | null }>;
+export function createVisitorModel(config?: AdaptationConfig, initial?: Partial<VisitorModel>): VisitorModel;
+export function observeVisitorSignal(model: VisitorModel, signal: { kind?: "search" | "select" | "view" | "engage"; text?: string; tags?: string[]; intent?: string }, config?: AdaptationConfig): VisitorModel;
+export function resolveAdaptiveData(data: Record<string, unknown>, model: VisitorModel, config?: AdaptationConfig): Record<string, unknown>;
 export function variantDistance(left: SubjectiveVariant, right: SubjectiveVariant): number;
 export class LocalProvider { name: string; compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest>; }
 export class JsonHttpProvider { constructor(options: Record<string, unknown>); compile(source: string, options?: Record<string, unknown>): Promise<SubjectiveManifest>; }

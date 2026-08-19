@@ -85,6 +85,24 @@ test("cinema mode renders a deterministic launch-film surface", () => {
   assert.match(html, /Open the product/);
 });
 
+test("adaptive data renders conversational intent, evidence disclosure, and reset controls", () => {
+  const html = renderSubjectiveMarkup({
+    manifest,
+    variant,
+    data: {
+      hero: { eyebrow: "One URL", title: "What do you need?", description: "Describe the day.", placeholder: "A sunset hike" },
+      adaptation: { enabled: true, label: "Outside mode", description: "Terrain comes first.", reasons: ["Your search matched hike."], prompts: ["Get outside"] }
+    },
+    devtools: false
+  });
+  assert.match(html, /sc-adaptive-mode/);
+  assert.match(html, /What do you need/);
+  assert.match(html, /data-sc-intent-form/);
+  assert.match(html, /Why this view/);
+  assert.match(html, /data-sc-adaptation-reset/);
+  assert.match(html, /data-sc-intent-prompt="Get outside"/);
+});
+
 test("provider-controlled glyphs are escaped before HTML interpolation", () => {
   const html = renderSubjectiveMarkup({
     manifest: { ...manifest, domain: { ...manifest.domain, icon: '<img src=x onerror="alert(1)">' } },

@@ -2,7 +2,7 @@
 
 > **Intent in. Interface out.**
 
-Subjective C is an experimental, open-source framework for building interfaces from product intent instead of fixed pixels. You describe what the product should accomplish, what must stay familiar, what should adapt, and how it should feel. The compiler turns that English into an inspectable manifest. The runtime then creates a constrained UI interpretation for the current user and context.
+Subjective C is an experimental, open-source framework for building interfaces from product intent instead of fixed pixels. You describe what the product should accomplish, what must stay familiar, what should adapt, and how it should feel. The compiler turns that English into an inspectable manifest. The runtime then creates a constrained UI interpretation from declared intent, searches, in-session behavior, device context, and explicit preferences.
 
 It is not random UI generation. It is **bounded variation with stable semantics**. The “C” is the compiler between human intent and a valid interface interpretation.
 
@@ -42,6 +42,8 @@ That source compiles into a stable intent manifest. A policy engine then chooses
 
 - A dependency-free English-to-manifest compiler
 - A deterministic seeded variation engine
+- An evidence-scored visitor model for declared intent, search, and in-session behavior
+- Adaptive data layers that change hierarchy and content without changing canonical URLs or action contracts
 - Six layout families and four collection representations
 - Novice, returning, expert, mobile, contrast, and motion contexts
 - Stable anchors for brand, actions, labels, semantics, and shortcuts
@@ -139,7 +141,12 @@ app.subjective
            │
            ▼
 ┌──────────────────────┐
-│ policy + variant     │  manifest + context + stable seed → interpretation
+│ visitor model        │  searches + choices + session behavior → intent evidence
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│ policy + variant     │  manifest + visitor intent + context → interpretation
 │ engine               │
 └──────────┬───────────┘
            │
@@ -158,6 +165,8 @@ app.subjective
 ```
 
 The important boundary is the manifest. A compiler may be heuristic, model-backed, human-authored, or domain-specific. The runtime does not care as long as the manifest validates.
+
+The reference app is a single San Francisco discovery URL. Searching for a sunset hike, drinks with friends, dancing, an Italian date, or a family day changes the page's hierarchy, copy, metrics, places, and visual interpretation. The evidence is session-scoped, inspectable through **Why this view?**, and resettable. It deliberately does not infer demographic or sensitive traits.
 
 ## Stable versus subjective
 

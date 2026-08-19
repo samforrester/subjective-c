@@ -202,9 +202,10 @@ function renderNavigation(manifest, variant, compact = false) {
 
 function renderPrimaryAction(manifest) {
   const action = getPrimaryAction(manifest);
+  const symbol = action.kind === "search" ? "⌕" : action.kind === "export" ? "↓" : "＋";
   return `
     <button class="sc-button sc-button-primary" type="button" data-sc-action="${escapeHtml(action.id)}" data-sc-action-kind="${escapeHtml(action.kind)}">
-      <span aria-hidden="true">＋</span>
+      <span aria-hidden="true">${symbol}</span>
       <span>${escapeHtml(action.label)}</span>
       ${action.shortcut ? `<kbd>${escapeHtml(action.shortcut)}</kbd>` : ""}
     </button>`;
@@ -246,7 +247,7 @@ function renderSidebar(manifest, variant) {
     </aside>`;
 }
 
-function renderHero(manifest, variant) {
+function renderHero(manifest, variant, data = {}) {
   const tone = manifest.intent.tone.slice(0, 4);
   const goal = shortGoal(manifest.intent.goal, variant.composition.copyMode);
   const title = variant.composition.hero === "welcome"
@@ -254,6 +255,34 @@ function renderHero(manifest, variant) {
     : manifest.name;
   const interpretation = interpretationMeta(variant);
   const copy = interpretationCopy(variant);
+  const adaptiveHero = data.hero && typeof data.hero === "object" ? data.hero : null;
+  const adaptation = data.adaptation && typeof data.adaptation === "object" ? data.adaptation : null;
+
+  if (adaptiveHero) {
+    const prompts = Array.isArray(adaptation?.prompts) ? adaptation.prompts : [];
+    const reasons = Array.isArray(adaptation?.reasons) ? adaptation.reasons : [];
+    return `
+      <section class="sc-hero sc-hero-adaptive" id="overview">
+        <div class="sc-adaptive-status">
+          <span><i aria-hidden="true"></i>${escapeHtml(adaptation?.label || "Exploring")}</span>
+          <details>
+            <summary>Why this view?</summary>
+            <div><p>${escapeHtml(adaptation?.description || "This page responds to what you search and explore in this session.")}</p>${reasons.length ? `<ul>${reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}<button type="button" data-sc-adaptation-reset>Reset my view</button></div>
+          </details>
+        </div>
+        <div class="sc-adaptive-hero-copy">
+          <span class="sc-eyebrow">${escapeHtml(adaptiveHero.eyebrow || interpretation.location)}</span>
+          <h1>${escapeHtml(adaptiveHero.title || goal)}</h1>
+          <p>${escapeHtml(adaptiveHero.description || goal)}</p>
+          <form class="sc-intent-search" data-sc-intent-form>
+            <label><span class="sc-sr-only">Describe what you want</span><input name="intent" autocomplete="off" placeholder="${escapeHtml(adaptiveHero.placeholder || "What are you in the mood for?")}" required></label>
+            <button type="submit">Reinterpret <span aria-hidden="true">→</span></button>
+          </form>
+          ${prompts.length ? `<div class="sc-intent-prompts"><span>Try</span>${prompts.map((prompt) => `<button type="button" data-sc-intent-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>`).join("")}</div>` : ""}
+        </div>
+        <div class="sc-adaptive-signal" aria-hidden="true"><span>${escapeHtml(interpretation.symbol)}</span><i></i><i></i><i></i></div>
+      </section>`;
+  }
 
   if (variant.composition.hero === "compact") {
     return `
@@ -481,7 +510,7 @@ function renderInsight(manifest, data, variant) {
 }
 
 function renderSection(name, manifest, data, variant) {
-  if (name === "hero") return renderHero(manifest, variant);
+  if (name === "hero") return renderHero(manifest, variant, data);
   if (name === "metrics") return renderMetrics(data, variant);
   if (name === "collection") return renderCollection(manifest, data, variant);
   if (name === "activity") return renderActivity(data, variant);
@@ -674,6 +703,7 @@ export function renderSubjectiveMarkup(state) {
     `sc-density-${classToken(preferences.density || variant.density, "balanced")}`,
     `sc-palette-${classToken(preferences.contrast === "high" ? "high-contrast" : preferences.palette || variant.theme.palette, "neutral")}`,
     `sc-motion-${classToken(preferences.motion || variant.theme.motion, "subtle")}`,
+    data?.adaptation?.enabled ? "sc-adaptive-mode" : "",
     cinemaMode ? "sc-cinema-mode" : "",
     devtools ? "sc-with-devtools" : ""
   ].filter(Boolean).join(" ");
@@ -810,6 +840,17 @@ function bindSubjective(target, state, options = {}) {
       return;
     }
 
+    const intentPrompt = element.closest("[data-sc-intent-prompt]");
+    if (intentPrompt) {
+      callbacks.onVisitorSignal?.({ kind: "search", text: intentPrompt.getAttribute("data-sc-intent-prompt") });
+      return;
+    }
+
+    if (element.matches("[data-sc-adaptation-reset]")) {
+      callbacks.onAdaptationReset?.();
+      return;
+    }
+
     if (element.matches("[data-sc-cinema-enter]")) {
       document.documentElement.dataset.subjectiveCinema = "live";
       callbacks.onCinemaPhaseChange?.("live");
@@ -866,6 +907,7 @@ function bindSubjective(target, state, options = {}) {
     if (itemElement && (!element.matches("button") || element.matches("[data-sc-item-open]"))) {
       const item = items[Number(itemElement.getAttribute("data-sc-item"))];
       if (item) {
+        callbacks.onVisitorSignal?.({ kind: "view", text: item.name, tags: item.tags || [] });
         const dialog = target.querySelector("[data-sc-item-dialog]");
         const title = dialog?.querySelector("[data-sc-item-dialog-title]");
         const body = dialog?.querySelector("[data-sc-item-dialog-body]");
@@ -969,6 +1011,13 @@ function bindSubjective(target, state, options = {}) {
   };
 
   const createForm = target.querySelector("[data-sc-create-form]");
+  const intentForm = target.querySelector("[data-sc-intent-form]");
+  const intentSubmitHandler = (event) => {
+    event.preventDefault();
+    const query = new FormData(intentForm).get("intent");
+    if (String(query || "").trim()) callbacks.onVisitorSignal?.({ kind: "search", text: String(query).trim() });
+  };
+  intentForm?.addEventListener("submit", intentSubmitHandler);
   const createSubmitHandler = (event) => {
     const submitter = event.submitter;
     if (!submitter?.matches("[data-sc-submit-create]")) return;
@@ -1043,6 +1092,7 @@ function bindSubjective(target, state, options = {}) {
       target.__subjectiveScrollHandler = null;
       target.__subjectivePointerFrame = null;
       createForm?.removeEventListener("submit", createSubmitHandler);
+      intentForm?.removeEventListener("submit", intentSubmitHandler);
       target.onclick = null;
       target.oninput = null;
       target.onchange = null;

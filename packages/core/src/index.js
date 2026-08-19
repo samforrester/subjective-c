@@ -41,3 +41,4 @@ export {
 export { defineAction, defineComponent, defineComponentRegistry, defineComponentPackage, defineThemeTokens } from "./contracts.js";
 export { createDefaultComponentRegistry, createSubjectivePlan, validatePlan } from "./planner.js";
 export { diagnoseSubjective, formatDiagnostics } from "./diagnostics.js";
+export { createVisitorModel, normalizeAdaptationConfig, observeVisitorSignal, resolveAdaptiveData } from "./adaptation.js";

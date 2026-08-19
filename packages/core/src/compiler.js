@@ -66,6 +66,7 @@ const TONE_WORDS = [
 ];
 
 const DOMAIN_PATTERNS = [
+  { pattern: /\bplaces?|destinations?|venues?|restaurants?|bars?|trails?|city guide\b/i, singular: "Place", plural: "Places", icon: "⌖" },
   { pattern: /\bprojects?\b/i, singular: "Project", plural: "Projects", icon: "◫" },
   { pattern: /\btasks?\b/i, singular: "Task", plural: "Tasks", icon: "✓" },
   { pattern: /\bdeals?|pipeline|opportunit(?:y|ies)\b/i, singular: "Deal", plural: "Deals", icon: "↗" },
