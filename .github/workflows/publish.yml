@@ -1,0 +1,69 @@
+name: Publish packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish (for example, v0.4.0-alpha.1)
+        required: true
+        type: string
+      dist_tag:
+        description: npm distribution tag
+        required: true
+        default: alpha
+        type: choice
+        options:
+          - alpha
+          - latest
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Verify release identity
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          node --input-type=module -e '
+            import root from "./package.json" with { type: "json" };
+            const expected = `v${root.version}`;
+            if (process.env.RELEASE_TAG !== expected) {
+              throw new Error(`Tag ${process.env.RELEASE_TAG} does not match package version ${expected}.`);
+            }
+          '
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: .cache/ms-playwright
+      - run: npm run release:check
+      - name: Publish dependency-free packages
+        env:
+          NPM_DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          npm publish --workspace=@subjective-c/core --access=public --tag "$NPM_DIST_TAG"
+          npm publish --workspace=@subjective-c/runtime --access=public --tag "$NPM_DIST_TAG"
+      - name: Publish adapters and CLI
+        env:
+          NPM_DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          npm publish --workspace=@subjective-c/react --access=public --tag "$NPM_DIST_TAG"
+          npm publish --workspace=subjective-c --access=public --tag "$NPM_DIST_TAG"
+          npm publish --workspace=create-subjective-c --access=public --tag "$NPM_DIST_TAG"

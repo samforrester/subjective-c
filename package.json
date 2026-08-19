@@ -22,9 +22,10 @@
     "demo:record": "node scripts/record-x-demo.mjs",
     "benchmark": "node scripts/benchmark.mjs",
     "verify:release": "node scripts/verify-release.mjs",
+    "verify:install": "node scripts/test-packed-install.mjs",
     "verify:contracts": "node scripts/verify-contracts.mjs",
     "check": "npm test && npm run typecheck && npm run verify:contracts && npm run test:semantics && npm run build:example && npm run doctor",
-    "release:check": "npm run check && npm run test:browser && npm run benchmark && npm run verify:release"
+    "release:check": "npm run check && npm run test:browser && npm run benchmark && npm run verify:release && npm run verify:install"
   },
   "engines": {
     "node": ">=20.11"
