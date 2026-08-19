@@ -26,7 +26,7 @@ try {
   await search.fill("");
   await page.getByRole("button", { name: /open lands end coastal trail/i }).click();
   await page.getByRole("dialog").waitFor();
-  await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Close").click();
   if (await page.getByRole("dialog").isVisible()) await page.keyboard.press("Escape");
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   await page.getByText("Why this view?", { exact: true }).click();
